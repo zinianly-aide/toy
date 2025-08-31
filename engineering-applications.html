@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微积分在工程学中的应用 | 微积分直观理解</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Chart.js用于数据可视化 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    
+    <!-- 配置Tailwind自定义颜色和字体 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        accent: '#f97316',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        math: ['STIX Two Math', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .canvas-container {
+                @apply relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg;
+            }
+            .section-fade {
+                @apply opacity-0 translate-y-8 transition-all duration-700;
+            }
+            .section-visible {
+                @apply opacity-100 translate-y-0;
+            }
+        }
+    </style>
+    
+    <style>
+        /* 基础样式 */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            background-color: #f8fafc;
+        }
+        
+        /* 数学符号显示优化 */
+        .math-expression {
+            font-family: 'STIX Two Math', serif;
+            font-size: 1.1em;
+        }
+        
+        /* Canvas容器样式 */
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 滚动条样式优化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+
+<body class="font-sans text-dark">
+    <!-- 导航栏 -->
+    <header id="navbar" class="fixed w-full z-50 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-calculator text-primary text-2xl"></i>
+                <h1 class="text-xl md:text-2xl font-bold text-primary">微积分直观理解</h1>
+            </div>
+            
+            <!-- 桌面导航 -->
+            <nav class="hidden md:flex space-x-8">
+                <a href="calculus-tutorial.html#intro" class="text-dark/80 hover:text-primary transition-colors">简介</a>
+                <a href="calculus-tutorial.html#derivative" class="text-dark/80 hover:text-primary transition-colors">导数</a>
+                <a href="calculus-tutorial.html#integral" class="text-dark/80 hover:text-primary transition-colors">积分</a>
+                <a href="calculus-tutorial.html#theorem" class="text-dark/80 hover:text-primary transition-colors">微积分基本定理</a>
+                <a href="calculus-tutorial.html#applications" class="text-primary font-medium">应用</a>
+            </nav>
+            
+            <!-- 移动端菜单按钮 -->
+            <button id="menu-toggle" class="md:hidden text-dark text-xl">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+        
+        <!-- 移动端导航菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="calculus-tutorial.html#intro" class="py-2 text-dark/80 hover:text-primary transition-colors">简介</a>
+                <a href="calculus-tutorial.html#derivative" class="py-2 text-dark/80 hover:text-primary transition-colors">导数</a>
+                <a href="calculus-tutorial.html#integral" class="py-2 text-dark/80 hover:text-primary transition-colors">积分</a>
+                <a href="calculus-tutorial.html#theorem" class="py-2 text-dark/80 hover:text-primary transition-colors">微积分基本定理</a>
+                <a href="calculus-tutorial.html#applications" class="py-2 text-primary font-medium">应用</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section class="pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-br from-accent/5 to-primary/5">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-dark text-shadow">
+                    微积分在<span class="text-accent">工程学</span>中的应用
+                </h1>
+                <p class="text-lg md:text-xl text-dark/70 mb-10">
+                    探索微积分如何成为工程设计、优化和分析的核心工具
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="#mechanical-engineering" class="px-8 py-3 bg-accent text-white rounded-lg font-medium hover:bg-accent/90 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-1">
+                        开始探索 <i class="fa fa-arrow-right ml-2"></i>
+                    </a>
+                    <a href="calculus-tutorial.html#applications" class="px-8 py-3 bg-white text-accent border border-accent rounded-lg font-medium hover:bg-accent/5 transition-all">
+                        返回应用列表
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-4 py-12">
+        <!-- 机械工程部分 -->
+        <section id="mechanical-engineering" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-accent rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">机械工程中的微积分应用</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-10">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">运动学与动力学分析</h3>
+                    <p class="mb-4">
+                        机械工程中，微积分用于描述和分析物体的运动状态和受力情况，是机械设计和动力学分析的基础。
+                    </p>
+                    <div class="space-y-4 mb-6">
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <p class="font-medium mb-1">位置、速度和加速度的关系：</p>
+                            <span class="math-expression">v(t) = ds/dt</span> （速度是位置的导数）<br>
+                            <span class="math-expression">a(t) = dv/dt = d²s/dt²</span> （加速度是速度的导数，位置的二阶导数）
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <p class="font-medium mb-1">牛顿第二定律：</p>
+                            <span class="math-expression">F = ma = m·d²s/dt²</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <p class="font-medium mb-1">功和能量：</p>
+                            <span class="math-expression">W = ∫ F·ds</span> （力沿路径的积分）<br>
+                            <span class="math-expression">K = ½mv²</span> （动能）
+                        </div>
+                    </div>
+                    <p class="mb-4">
+                        这些关系在机械系统分析、机器人运动规划、车辆动力学等领域有广泛应用。
+                    </p>
+                </div>
+                
+                <div class="canvas-container h-96">
+                    <canvas id="motionCanvas"></canvas>
+                    <div class="absolute top-3 right-3 flex space-x-2">
+                        <button id="prevMotion" class="p-2 bg-accent/10 hover:bg-accent/20 rounded-full transition-colors">
+                            <i class="fa fa-arrow-left text-accent"></i>
+                        </button>
+                        <button id="nextMotion" class="p-2 bg-accent/10 hover:bg-accent/20 rounded-full transition-colors">
+                            <i class="fa fa-arrow-right text-accent"></i>
+                        </button>
+                    </div>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        不同运动状态下的位置、速度和加速度关系
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 结构力学部分 -->
+        <section id="structural-mechanics" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-primary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">结构力学与材料力学</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-10">
+                <div class="canvas-container h-96">
+                    <canvas id="beamCanvas"></canvas>
+                    <div class="absolute top-3 right-3 flex space-x-2">
+                        <button id="changeLoad" class="p-2 bg-primary/10 hover:bg-primary/20 rounded-full transition-colors">
+                            <i class="fa fa-refresh text-primary"></i>
+                        </button>
+                    </div>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        简支梁的剪力图和弯矩图
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">梁的内力分析</h3>
+                    <p class="mb-4">
+                        结构力学中，微积分用于分析梁和其他结构元件的内力分布，是结构设计的基础。
+                    </p>
+                    <div class="bg-white p-4 rounded-lg shadow-sm mb-6">
+                        <p class="font-medium mb-2">基本关系：</p>
+                        <span class="math-expression">V(x) = dM/dx</span> （剪力是弯矩的一阶导数）<br>
+                        <span class="math-expression">w(x) = dV/dx = d²M/dx²</span> （载荷集度是剪力的一阶导数，弯矩的二阶导数）
+                    </div>
+                    <p class="mb-4">
+                        其中：
+                    </p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-primary mt-1 mr-2"></i>
+                            <span><span class="math-expression">w(x)</span>：分布载荷集度</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-primary mt-1 mr-2"></i>
+                            <span><span class="math-expression">V(x)</span>：剪力</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-primary mt-1 mr-2"></i>
+                            <span><span class="math-expression">M(x)</span>：弯矩</span>
+                        </li>
+                    </ul>
+                    <p class="mb-4">
+                        工程师通过这些关系可以确定结构中的最大应力点和变形情况，确保结构的安全性和可靠性。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 流体力学部分 -->
+        <section id="fluid-mechanics" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-secondary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">流体力学中的微积分</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-10">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">连续性方程与伯努利方程</h3>
+                    <p class="mb-4">
+                        流体力学中，微积分用于描述流体的运动规律，是流体机械设计和管道系统分析的基础。
+                    </p>
+                    <div class="space-y-4 mb-6">
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <p class="font-medium mb-1">连续性方程（质量守恒）：</p>
+                            <span class="math-expression">∂ρ/∂t + ∇·(ρv) = 0</span>
+                            <p class="text-sm text-dark/60 mt-1">对于不可压缩流体：∇·v = 0</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <p class="font-medium mb-1">伯努利方程（能量守恒）：</p>
+                            <span class="math-expression">P/ρ + v²/2 + gh = 常数</span>
+                            <p class="text-sm text-dark/60 mt-1">沿流线成立</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <p class="font-medium mb-1">纳维-斯托克斯方程（动量守恒）：</p>
+                            <span class="math-expression">ρ(∂v/∂t + v·∇v) = -∇P + μ∇²v + ρg</span>
+                        </div>
+                    </div>
+                    <p class="mb-4">
+                        这些方程在水泵设计、管道系统分析、航空航天工程等领域有广泛应用。
+                    </p>
+                </div>
+                
+                <div class="canvas-container h-96">
+                    <canvas id="fluidFlowCanvas"></canvas>
+                    <div class="absolute top-3 left-3 flex flex-col space-y-2">
+                        <div class="flex items-center space-x-2">
+                            <button id="decreaseVelocity" class="p-2 bg-secondary/10 hover:bg-secondary/20 rounded-full transition-colors">
+                                <i class="fa fa-minus text-secondary"></i>
+                            </button>
+                            <span id="velocityValue" class="text-sm bg-white px-2 py-1 rounded shadow-sm">流速: 2 m/s</span>
+                            <button id="increaseVelocity" class="p-2 bg-secondary/10 hover:bg-secondary/20 rounded-full transition-colors">
+                                <i class="fa fa-plus text-secondary"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        流体在管道中的速度分布
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 热传导部分 -->
+        <section id="heat-transfer" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-accent rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">热传导与热扩散</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-10">
+                <div class="canvas-container h-96">
+                    <canvas id="heatTransferCanvas"></canvas>
+                    <div class="absolute top-3 right-3 flex space-x-2">
+                        <button id="resetHeat" class="p-2 bg-accent/10 hover:bg-accent/20 rounded-full transition-colors">
+                            <i class="fa fa-refresh text-accent"></i>
+                        </button>
+                    </div>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        导热过程中的温度分布
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">傅里叶热传导方程</h3>
+                    <p class="mb-4">
+                        热传导是热量传递的三种基本方式之一，微积分中的偏微分方程用于描述温度场的变化规律。
+                    </p>
+                    <div class="bg-white p-4 rounded-lg shadow-sm mb-6 text-center">
+                        <span class="math-expression text-xl">∂T/∂t = α∇²T + Φ</span>
+                        <p class="text-sm text-dark/60 mt-1">其中α是热扩散系数，Φ是内热源</p>
+                    </div>
+                    <p class="mb-4">
+                        对于稳态导热（温度不随时间变化），方程简化为：
+                    </p>
+                    <div class="bg-white p-4 rounded-lg shadow-sm mb-6 text-center">
+                        <span class="math-expression text-xl">∇²T + Φ/α = 0</span>
+                    </div>
+                    <p class="mb-4">
+                        在一维情况下，可以进一步简化为：
+                    </p>
+                    <div class="bg-white p-4 rounded-lg shadow-sm mb-6 text-center">
+                        <span class="math-expression text-xl">∂²T/∂x² + Φ/α = 0</span>
+                    </div>
+                    <p class="mb-4">
+                        热传导方程在热交换器设计、电子设备散热分析、建筑保温设计等领域有广泛应用。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 控制系统部分 -->
+        <section id="control-systems" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-primary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">控制系统与反馈理论</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-10">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">拉普拉斯变换与传递函数</h3>
+                    <p class="mb-4">
+                        控制系统工程中，微积分用于建立系统的数学模型，分析系统的动态特性，设计控制器以实现预期的性能。
+                    </p>
+                    <div class="space-y-4 mb-6">
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <p class="font-medium mb-1">拉普拉斯变换：</p>
+                            <span class="math-expression">L{f(t)} = F(s) = ∫₀^∞ f(t)e^(-st) dt</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <p class="font-medium mb-1">传递函数：</p>
+                            <span class="math-expression">G(s) = Y(s)/U(s)</span>
+                            <p class="text-sm text-dark/60 mt-1">输出的拉普拉斯变换与输入的拉普拉斯变换之比</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <p class="font-medium mb-1">PID控制器：</p>
+                            <span class="math-expression">G_c(s) = K_p + K_i/s + K_d s</span>
+                            <p class="text-sm text-dark/60 mt-1">比例-积分-微分控制器</p>
+                        </div>
+                    </div>
+                    <p class="mb-4">
+                        这些工具在工业自动化、机器人控制、自动驾驶等领域有广泛应用。
+                    </p>
+                </div>
+                
+                <div class="canvas-container h-96">
+                    <canvas id="controlSystemCanvas"></canvas>
+                    <div class="absolute top-3 right-3 flex flex-col space-y-2">
+                        <div class="bg-white px-3 py-1 rounded-lg shadow-sm text-sm">
+                            <span class="font-medium">控制器类型：</span>
+                            <select id="controllerType" class="border-none bg-transparent text-primary focus:ring-0">
+                                <option value="p">比例控制 (P)</option>
+                                <option value="pi">比例积分控制 (PI)</option>
+                                <option value="pd">比例微分控制 (PD)</option>
+                                <option value="pid" selected>比例积分微分控制 (PID)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        不同控制器下的系统响应
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 实际案例研究 -->
+        <section id="case-studies" class="max-w-5xl mx-auto mb-10 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-secondary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">实际案例研究</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- 案例1：桥梁设计 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+                    <div class="h-48 bg-primary/10 flex items-center justify-center">
+                        <i class="fa fa-bridge text-primary text-6xl"></i>
+                    </div>
+                    <div class="p-5">
+                        <h3 class="text-xl font-semibold mb-2">桥梁结构分析</h3>
+                        <p class="text-dark/70 mb-4">
+                            工程师使用微积分分析桥梁在各种载荷条件下的应力分布和变形情况，确保桥梁的安全性和耐久性。有限元分析方法基于微积分原理，是现代桥梁设计的核心工具。
+                        </p>
+                        <div class="bg-primary/5 p-3 rounded-lg">
+                            <span class="math-expression">σ = My/I</span>
+                            <p class="text-sm text-dark/60 mt-1">弯曲应力公式，用于计算梁的应力分布</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 案例2：火箭推进 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+                    <div class="h-48 bg-secondary/10 flex items-center justify-center">
+                        <i class="fa fa-rocket text-secondary text-6xl"></i>
+                    </div>
+                    <div class="p-5">
+                        <h3 class="text-xl font-semibold mb-2">火箭推进系统设计</h3>
+                        <p class="text-dark/70 mb-4">
+                            火箭工程师使用微积分分析推进剂燃烧、推力产生和飞行器运动。火箭方程基于动量守恒原理，是航天工程的基础公式。
+                        </p>
+                        <div class="bg-secondary/5 p-3 rounded-lg">
+                            <span class="math-expression">Δv = v_e ln(m₀/m_f)</span>
+                            <p class="text-sm text-dark/60 mt-1">齐奥尔科夫斯基火箭方程，描述速度增量与质量比的关系</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="max-w-5xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                    <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                        <i class="fa fa-calculator text-primary text-2xl"></i>
+                        <h2 class="text-xl font-bold">微积分直观理解</h2>
+                    </div>
+                    <div class="flex space-x-6">
+                        <a href="calculus-tutorial.html#intro" class="text-white/70 hover:text-primary transition-colors">简介</a>
+                        <a href="calculus-tutorial.html#derivative" class="text-white/70 hover:text-primary transition-colors">导数</a>
+                        <a href="calculus-tutorial.html#integral" class="text-white/70 hover:text-primary transition-colors">积分</a>
+                        <a href="calculus-tutorial.html#applications" class="text-white/70 hover:text-primary transition-colors">应用</a>
+                    </div>
+                </div>
+                
+                <div class="border-t border-white/10 pt-8 text-center text-white/60 text-sm">
+                    <p>© 2023 微积分直观理解. 本网站旨在通过交互式可视化帮助理解微积分概念。</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript代码 -->
+    <script>
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('py-2', 'shadow');
+                navbar.classList.remove('py-3');
+            } else {
+                navbar.classList.add('py-3');
+                navbar.classList.remove('py-2', 'shadow');
+            }
+        });
+        
+        // 移动端菜单切换
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // 滚动动画
+        const sections = document.querySelectorAll('.section-fade');
+        
+        function checkVisibility() {
+            sections.forEach(section => {
+                const sectionTop = section.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                
+                if (sectionTop < windowHeight * 0.85) {
+                    section.classList.add('section-visible');
+                }
+            });
+        }
+        
+        // 初始检查
+        window.addEventListener('load', checkVisibility);
+        // 滚动时检查
+        window.addEventListener('scroll', checkVisibility);
+        
+        // 运动分析画布
+        const motionCtx = document.getElementById('motionCanvas').getContext('2d');
+        let currentMotionIndex = 0;
+        const motionTypes = [
+            {
+                name: '匀速直线运动',
+                position: t => 5 * t,
+                velocity: t => 5,
+                acceleration: t => 0
+            },
+            {
+                name: '匀加速直线运动',
+                position: t => 2.5 * t * t,
+                velocity: t => 5 * t,
+                acceleration: t => 5
+            },
+            {
+                name: '简谐运动',
+                position: t => 5 * Math.cos(t),
+                velocity: t => -5 * Math.sin(t),
+                acceleration: t => -5 * Math.cos(t)
+            }
+        ];
+        
+        function drawMotion() {
+            const canvas = document.getElementById('motionCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = canvas.parentElement.clientHeight;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            const motion = motionTypes[currentMotionIndex];
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(50, 50);
+            ctx.lineTo(50, height - 50);
+            ctx.lineTo(width - 30, height - 50);
+            ctx.stroke();
+            
+            // 绘制网格
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const x = 50 + i * (width - 80) / 10;
+                ctx.beginPath();
+                ctx.moveTo(x, 50);
+                ctx.lineTo(x, height - 50);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= 6; i++) {
+                const y = 50 + i * (height - 100) / 6;
+                ctx.beginPath();
+                ctx.moveTo(50, y);
+                ctx.lineTo(width - 30, y);
+                ctx.stroke();
+            }
+            
+            // 绘制位置曲线
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let t = 0; t <= 10; t += 0.1) {
+                const x = 50 + t * (width - 80) / 10;
+                const s = motion.position(t);
+                const y = height - 50 - (s + 10) * (height - 100) / 40;
+                if (t === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // 绘制速度曲线
+            ctx.strokeStyle = '#7c3aed';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let t = 0; t <= 10; t += 0.1) {
+                const x = 50 + t * (width - 80) / 10;
+                const v = motion.velocity(t);
+                const y = height - 50 - (v + 10) * (height - 100) / 40;
+                if (t === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // 绘制加速度曲线
+            ctx.strokeStyle = '#f97316';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let t = 0; t <= 10; t += 0.1) {
+                const x = 50 + t * (width - 80) / 10;
+                const a = motion.acceleration(t);
+                const y = height - 50 - (a + 10) * (height - 100) / 40;
+                if (t === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // 绘制图例
+            ctx.fillStyle = '#2563eb';
+            ctx.fillRect(30, 20, 15, 10);
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('位置 s(t)', 50, 30);
+            
+            ctx.fillStyle = '#7c3aed';
+            ctx.fillRect(150, 20, 15, 10);
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('速度 v(t)', 170, 30);
+            
+            ctx.fillStyle = '#f97316';
+            ctx.fillRect(270, 20, 15, 10);
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('加速度 a(t)', 290, 30);
+            
+            // 显示当前运动类型
+            ctx.fillStyle = '#000';
+            ctx.font = '14px Arial';
+            ctx.fillText(motion.name, width - 150, 30);
+        }
+        
+        // 运动类型控制按钮
+        document.getElementById('prevMotion').addEventListener('click', function() {
+            currentMotionIndex = (currentMotionIndex - 1 + motionTypes.length) % motionTypes.length;
+            drawMotion();
+        });
+        
+        document.getElementById('nextMotion').addEventListener('click', function() {
+            currentMotionIndex = (currentMotionIndex + 1) % motionTypes.length;
+            drawMotion();
+        });
+        
+        // 梁分析画布
+        const beamCtx = document.getElementById('beamCanvas').getContext('2d');
+        let loadPosition = 0.3; // 集中载荷位置（占梁长度的比例）
+        let loadMagnitude = 100; // 载荷大小
+        
+        function drawBeam() {
+            const canvas = document.getElementById('beamCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = canvas.parentElement.clientHeight;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(50, 50);
+            ctx.lineTo(50, height - 50);
+            ctx.lineTo(width - 30, height - 50);
+            ctx.stroke();
+            
+            // 绘制网格
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const x = 50 + i * (width - 80) / 10;
+                ctx.beginPath();
+                ctx.moveTo(x, 50);
+                ctx.lineTo(x, height - 50);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= 6; i++) {
+                const y = 50 + i * (height - 100) / 6;
+                ctx.beginPath();
+                ctx.moveTo(50, y);
+                ctx.lineTo(width - 30, y);
+                ctx.stroke();
+            }
+            
+            // 绘制简支梁
+            const beamLength = 800; // 梁的长度（任意单位）
+            const beamStartX = 50;
+            const beamEndX = width - 30;
+            const beamY = height - 50;
+            
+            // 绘制梁的基线
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(beamStartX, beamY);
+            ctx.lineTo(beamEndX, beamY);
+            ctx.stroke();
+            
+            // 绘制支点
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(beamStartX, beamY, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(beamEndX, beamY, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 绘制集中载荷
+            const loadX = beamStartX + loadPosition * (beamEndX - beamStartX);
+            ctx.fillStyle = '#f97316';
+            ctx.beginPath();
+            ctx.arc(loadX, beamY, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 绘制载荷方向箭头
+            ctx.strokeStyle = '#f97316';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(loadX, beamY);
+            ctx.lineTo(loadX, beamY + 30);
+            ctx.lineTo(loadX - 5, beamY + 20);
+            ctx.moveTo(loadX, beamY + 30);
+            ctx.lineTo(loadX + 5, beamY + 20);
+            ctx.stroke();
+            
+            // 计算并绘制剪力图
+            const shearForceTop = 100; // 剪力图顶部位置（像素）
+            const shearForceHeight = 100; // 剪力图高度（像素）
+            
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            // 计算支座反力
+            const reactionLeft = loadMagnitude * (1 - loadPosition);
+            const reactionRight = loadMagnitude * loadPosition;
+            
+            // 绘制左支座到载荷之间的剪力
+            const leftShearY = shearForceTop + (1 - reactionLeft / loadMagnitude) * shearForceHeight;
+            ctx.moveTo(beamStartX, leftShearY);
+            ctx.lineTo(loadX, leftShearY);
+            
+            // 绘制载荷到右支座之间的剪力
+            const rightShearY = shearForceTop + (1 + reactionRight / loadMagnitude) * shearForceHeight;
+            ctx.lineTo(loadX, rightShearY);
+            ctx.lineTo(beamEndX, rightShearY);
+            ctx.stroke();
+            
+            // 计算并绘制弯矩图
+            const momentTop = 220; // 弯矩图顶部位置（像素）
+            const momentHeight = 100; // 弯矩图高度（像素）
+            
+            ctx.strokeStyle = '#7c3aed';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            // 最大弯矩
+            const maxMoment = loadMagnitude * loadPosition * (1 - loadPosition);
+            
+            // 绘制弯矩曲线（抛物线）
+            for (let x = 0; x <= 100; x++) {
+                const beamX = beamStartX + x * (beamEndX - beamStartX) / 100;
+                const positionRatio = x / 100;
+                let moment;
+                
+                if (positionRatio <= loadPosition) {
+                    moment = reactionLeft * positionRatio * beamLength;
+                } else {
+                    moment = reactionLeft * positionRatio * beamLength - loadMagnitude * (positionRatio - loadPosition) * beamLength;
+                }
+                
+                const momentY = momentTop + (1 - moment / maxMoment) * momentHeight / 2;
+                
+                if (x === 0) {
+                    ctx.moveTo(beamX, momentY);
+                } else {
+                    ctx.lineTo(beamX, momentY);
+                }
+            }
+            
+            ctx.stroke();
+            
+            // 绘制图例
+            ctx.fillStyle = '#2563eb';
+            ctx.fillRect(30, 20, 15, 10);
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('剪力图', 50, 30);
+            
+            ctx.fillStyle = '#7c3aed';
+            ctx.fillRect(150, 20, 15, 10);
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('弯矩图', 170, 30);
+        }
+        
+        // 改变载荷按钮
+        document.getElementById('changeLoad').addEventListener('click', function() {
+            loadPosition = 0.2 + Math.random() * 0.6; // 随机改变载荷位置
+            loadMagnitude = 80 + Math.random() * 40; // 随机改变载荷大小
+            drawBeam();
+        });
+        
+        // 流体流动画布
+        const fluidFlowCtx = document.getElementById('fluidFlowCanvas').getContext('2d');
+        let flowVelocity = 2; // 流速
+        
+        function drawFluidFlow() {
+            const canvas = document.getElementById('fluidFlowCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = canvas.parentElement.clientHeight;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制管道
+            const pipeWidth = width * 0.7;
+            const pipeHeight = height * 0.6;
+            const pipeX = (width - pipeWidth) / 2;
+            const pipeY = (height - pipeHeight) / 2;
+            
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(pipeX, pipeY, pipeWidth, pipeHeight);
+            
+            // 绘制速度分布（抛物线分布，层流）
+            const maxVelocity = flowVelocity;
+            const centerY = pipeY + pipeHeight / 2;
+            const radius = pipeHeight / 2;
+            
+            // 创建渐变
+            const velocityGradient = ctx.createLinearGradient(0, centerY - radius, 0, centerY);
+            velocityGradient.addColorStop(0, 'rgba(37, 99, 235, 0.1)');
+            velocityGradient.addColorStop(1, 'rgba(37, 99, 235, 0.8)');
+            
+            ctx.fillStyle = velocityGradient;
+            
+            // 绘制速度分布曲线
+            for (let x = pipeX; x <= pipeX + pipeWidth; x += 5) {
+                for (let y = pipeY; y <= pipeY + pipeHeight; y++) {
+                    const distanceFromCenter = Math.abs(y - centerY);
+                    if (distanceFromCenter <= radius) {
+                        const velocityAtPoint = maxVelocity * (1 - Math.pow(distanceFromCenter / radius, 2));
+                        const alpha = 0.1 + 0.7 * velocityAtPoint / maxVelocity;
+                        ctx.fillStyle = `rgba(37, 99, 235, ${alpha})`;
+                        ctx.fillRect(x, y, 5, 1);
+                    }
+                }
+            }
+            
+            // 绘制流线
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i <= 10; i++) {
+                const y = pipeY + (pipeHeight / 10) * i;
+                const distanceFromCenter = Math.abs(y - centerY);
+                const velocityAtPoint = maxVelocity * (1 - Math.pow(distanceFromCenter / radius, 2));
+                
+                ctx.beginPath();
+                let prevX = pipeX;
+                let prevY = y;
+                ctx.moveTo(prevX, prevY);
+                
+                for (let x = pipeX; x <= pipeX + pipeWidth; x += 10) {
+                    // 流线的斜率与速度成正比
+                    const dy = (velocityAtPoint / maxVelocity) * 0.5; // 控制流线的弯曲程度
+                    const newY = prevY + dy;
+                    
+                    ctx.quadraticCurveTo(prevX + 5, prevY, x, newY);
+                    
+                    prevX = x;
+                    prevY = newY;
+                }
+                
+                ctx.stroke();
+            }
+            
+            // 更新流速显示
+            document.getElementById('velocityValue').textContent = `流速: ${flowVelocity.toFixed(1)} m/s`;
+        }
+        
+        // 流速控制按钮
+        document.getElementById('decreaseVelocity').addEventListener('click', function() {
+            if (flowVelocity > 0.5) {
+                flowVelocity -= 0.5;
+                drawFluidFlow();
+            }
+        });
+        
+        document.getElementById('increaseVelocity').addEventListener('click', function() {
+            if (flowVelocity < 5) {
+                flowVelocity += 0.5;
+                drawFluidFlow();
+            }
+        });
+        
+        // 热传导画布
+        const heatTransferCtx = document.getElementById('heatTransferCanvas').getContext('2d');
+        let heatTime = 0;
+        
+        function drawHeatTransfer() {
+            const canvas = document.getElementById('heatTransferCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = canvas.parentElement.clientHeight;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制平板
+            const plateWidth = width * 0.8;
+            const plateHeight = height * 0.6;
+            const plateX = (width - plateWidth) / 2;
+            const plateY = (height - plateHeight) / 2;
+            
+            // 绘制温度分布
+            for (let x = 0; x <= plateWidth; x++) {
+                for (let y = 0; y <= plateHeight; y++) {
+                    // 一维导热问题，假设左边界温度为100度，右边界为0度
+                    // 温度分布随时间变化的解
+                    const positionRatio = x / plateWidth;
+                    const alpha = 0.1; // 热扩散系数
+                    const temp = 100 * (1 - positionRatio) * Math.exp(-heatTime * alpha);
+                    
+                    // 将温度映射到颜色
+                    const r = Math.min(255, Math.floor(temp * 2.55));
+                    const b = Math.max(0, Math.floor(255 - temp * 2.55));
+                    const g = Math.floor((r + b) / 2);
+                    
+                    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                    ctx.fillRect(plateX + x, plateY + y, 1, 1);
+                }
+            }
+            
+            // 绘制平板边界
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(plateX, plateY, plateWidth, plateHeight);
+            
+            // 绘制温度刻度
+            const scaleWidth = 20;
+            const scaleHeight = plateHeight;
+            const scaleX = plateX + plateWidth + 20;
+            const scaleY = plateY;
+            
+            // 绘制温度色标
+            for (let y = 0; y <= scaleHeight; y++) {
+                const temp = 100 - (y / scaleHeight) * 100;
+                const r = Math.min(255, Math.floor(temp * 2.55));
+                const b = Math.max(0, Math.floor(255 - temp * 2.55));
+                const g = Math.floor((r + b) / 2);
+                
+                ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                ctx.fillRect(scaleX, scaleY + y, scaleWidth, 1);
+            }
+            
+            // 绘制温度刻度标签
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('100°C', scaleX + scaleWidth + 5, scaleY + 15);
+            ctx.fillText('50°C', scaleX + scaleWidth + 5, scaleY + scaleHeight / 2 + 5);
+            ctx.fillText('0°C', scaleX + scaleWidth + 5, scaleY + scaleHeight);
+            
+            // 更新热传导时间
+            heatTime += 0.01;
+            if (heatTime > 5) heatTime = 5;
+        }
+        
+        // 重置热传导按钮
+        document.getElementById('resetHeat').addEventListener('click', function() {
+            heatTime = 0;
+            drawHeatTransfer();
+        });
+        
+        // 控制系统画布
+        const controlSystemCtx = document.getElementById('controlSystemCanvas').getContext('2d');
+        let controllerType = 'pid';
+        
+        function drawControlSystem() {
+            const canvas = document.getElementById('controlSystemCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = canvas.parentElement.clientHeight;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(50, 50);
+            ctx.lineTo(50, height - 50);
+            ctx.lineTo(width - 30, height - 50);
+            ctx.stroke();
+            
+            // 绘制网格
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const x = 50 + i * (width - 80) / 10;
+                ctx.beginPath();
+                ctx.moveTo(x, 50);
+                ctx.lineTo(x, height - 50);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= 6; i++) {
+                const y = 50 + i * (height - 100) / 6;
+                ctx.beginPath();
+                ctx.moveTo(50, y);
+                ctx.lineTo(width - 30, y);
+                ctx.stroke();
+            }
+            
+            // 绘制参考值（阶跃输入）
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            const referenceY = 50 + (height - 100) / 2;
+            ctx.moveTo(50, referenceY);
+            ctx.lineTo(width - 30, referenceY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 绘制系统响应
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            // PID控制器参数
+            const Kp = 1.0;
+            const Ki = 0.5;
+            const Kd = 0.2;
+            
+            let integral = 0;
+            let prevError = 0;
+            let output = 0;
+            
+            for (let t = 0; t <= 10; t += 0.1) {
+                const x = 50 + t * (width - 80) / 10;
+                const setpoint = 1.0; // 参考值
+                
+                // 计算误差
+                const error = setpoint - output;
+                
+                // 计算积分项
+                integral += error * 0.1; // 积分步长
+                
+                // 计算微分项
+                const derivative = (error - prevError) / 0.1;
+                prevError = error;
+                
+                // 根据控制器类型计算控制输出
+                let controlAction;
+                if (controllerType === 'p') {
+                    controlAction = Kp * error;
+                } else if (controllerType === 'pi') {
+                    controlAction = Kp * error + Ki * integral;
+                } else if (controllerType === 'pd') {
+                    controlAction = Kp * error + Kd * derivative;
+                } else if (controllerType === 'pid') {
+                    controlAction = Kp * error + Ki * integral + Kd * derivative;
+                }
+                
+                // 更新系统输出（简单一阶系统）
+                output += 0.1 * controlAction;
+                
+                // 将输出映射到画布
+                const y = referenceY - output * (height - 200) / 2;
+                
+                if (t === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            
+            ctx.stroke();
+            
+            // 绘制图例
+            ctx.fillStyle = '#000';
+            ctx.fillRect(30, 20, 15, 10);
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('参考值', 50, 30);
+            
+            ctx.fillStyle = '#2563eb';
+            ctx.fillRect(150, 20, 15, 10);
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('系统响应', 170, 30);
+        }
+        
+        // 控制器类型选择
+        document.getElementById('controllerType').addEventListener('change', function() {
+            controllerType = this.value;
+            drawControlSystem();
+        });
+        
+        // 初始化并绘制所有图表
+        window.addEventListener('load', function() {
+            drawMotion();
+            drawBeam();
+            drawFluidFlow();
+            drawHeatTransfer();
+            drawControlSystem();
+            
+            // 添加窗口大小变化时重绘图表
+            window.addEventListener('resize', function() {
+                drawMotion();
+                drawBeam();
+                drawFluidFlow();
+                drawHeatTransfer();
+                drawControlSystem();
+            });
+            
+            // 热传导动画
+            setInterval(function() {
+                if (heatTime < 5) {
+                    drawHeatTransfer();
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>

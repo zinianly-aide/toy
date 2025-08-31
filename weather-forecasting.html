@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微积分在天气预报中的应用 | 微积分教程网站</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <!-- 自定义配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb', // 主色调 - 蓝色
+                        secondary: '#4f46e5', // 辅助色 - 靛蓝色
+                        accent: '#0ea5e9', // 强调色 - 亮蓝色
+                        neutral: '#f8fafc', // 中性色 - 浅灰
+                        dark: '#1e293b', // 深色 - 深蓝灰
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        math: ['Cambria Math', 'serif'],
+                    },
+                },
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .transition-custom {
+                transition: all 0.3s ease-in-out;
+            }
+            .hover-lift {
+                transition: transform 0.2s ease-in-out;
+            }
+            .hover-lift:hover {
+                transform: translateY(-2px);
+            }
+            .bg-gradient-custom {
+                background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+            }
+        }
+    </style>
+    <!-- 基础样式 -->
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .math-formula {
+            font-family: 'Cambria Math', serif;
+            font-size: 1.1em;
+        }
+        /* 代码高亮 */
+        .code-block {
+            background-color: #f8fafc;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.9rem;
+        }
+        /* 响应式表格 */
+        .responsive-table {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+        }
+        /* 滚动条美化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-neutral text-dark">
+    <!-- 导航栏 -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm transition-all duration-300">
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="calculus-tutorial.html" class="flex items-center gap-2 text-primary font-bold text-xl">
+                <i class="fa fa-calculator" aria-hidden="true"></i>
+                <span>微积分教程</span>
+            </a>
+            
+            <!-- 桌面端导航菜单 -->
+            <ul class="hidden md:flex items-center space-x-8">
+                <li><a href="calculus-tutorial.html" class="hover:text-primary transition-custom">首页</a></li>
+                <li><a href="calculus-tutorial.html#concepts" class="hover:text-primary transition-custom">核心概念</a></li>
+                <li><a href="calculus-tutorial.html#applications" class="hover:text-primary transition-custom">实际应用</a></li>
+                <li><a href="calculus-tutorial.html#tutorials" class="hover:text-primary transition-custom">学习教程</a></li>
+                <li><a href="calculus-tutorial.html#resources" class="hover:text-primary transition-custom">资源</a></li>
+            </ul>
+            
+            <!-- 移动端导航按钮 -->
+            <button id="mobile-menu-button" class="md:hidden text-dark hover:text-primary transition-custom">
+                <i class="fa fa-bars text-2xl" aria-hidden="true"></i>
+            </button>
+        </nav>
+        
+        <!-- 移动端导航菜单 -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white border-t border-gray-200">
+            <ul class="container mx-auto px-4 py-2 space-y-3">
+                <li><a href="calculus-tutorial.html" class="block py-2 hover:text-primary transition-custom">首页</a></li>
+                <li><a href="calculus-tutorial.html#concepts" class="block py-2 hover:text-primary transition-custom">核心概念</a></li>
+                <li><a href="calculus-tutorial.html#applications" class="block py-2 hover:text-primary transition-custom">实际应用</a></li>
+                <li><a href="calculus-tutorial.html#tutorials" class="block py-2 hover:text-primary transition-custom">学习教程</a></li>
+                <li><a href="calculus-tutorial.html#resources" class="block py-2 hover:text-primary transition-custom">资源</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <main>
+        <!-- 英雄区域 -->
+        <section class="bg-gradient-custom text-white py-16 md:py-24">
+            <div class="container mx-auto px-4">
+                <div class="max-w-3xl mx-auto text-center">
+                    <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold mb-6 leading-tight text-shadow">微积分在天气预报中的应用</h1>
+                    <p class="text-xl md:text-2xl mb-8 text-white/90">探索数学如何帮助我们预测复杂的天气系统</p>
+                    <div class="flex flex-col sm:flex-row justify-center gap-4">
+                        <a href="#introduction" class="px-8 py-3 bg-white text-primary font-medium rounded-lg shadow-lg hover:bg-opacity-90 transition-custom hover-lift">
+                            开始探索
+                        </a>
+                        <a href="calculus-tutorial.html#applications" class="px-8 py-3 bg-transparent border-2 border-white text-white font-medium rounded-lg hover:bg-white/10 transition-custom hover-lift">
+                            返回应用列表
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 介绍部分 -->
+        <section id="introduction" class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="max-w-4xl mx-auto">
+                    <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-8 text-center text-dark">天气预测的数学基础</h2>
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div>
+                            <p class="text-lg mb-6">天气预报是现代生活中不可或缺的一部分，而微积分则是其背后的数学基础。从大气运动方程到数值模拟，微积分帮助气象学家理解和预测复杂的天气系统。</p>
+                            <p class="text-lg mb-6">通过偏微分方程和数值积分，科学家能够建立大气模型，模拟和预测未来的天气状况。这些模型考虑了温度、压力、湿度、风速等多种因素的相互作用。</p>
+                            <div class="flex items-center gap-3 mb-4">
+                                <i class="fa fa-check-circle text-green-500 text-xl" aria-hidden="true"></i>
+                                <span>基于流体力学的偏微分方程</span>
+                            </div>
+                            <div class="flex items-center gap-3 mb-4">
+                                <i class="fa fa-check-circle text-green-500 text-xl" aria-hidden="true"></i>
+                                <span>数值天气预报模型</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i class="fa fa-check-circle text-green-500 text-xl" aria-hidden="true"></i>
+                                <span>数据同化技术</span>
+                            </div>
+                        </div>
+                        <div class="rounded-xl overflow-hidden shadow-xl hover-lift">
+                            <img src="https://picsum.photos/id/1015/800/600" alt="天气预报卫星图像" class="w-full h-auto">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 核心数学原理 -->
+        <section class="py-16 bg-neutral">
+            <div class="container mx-auto px-4">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-12 text-center text-dark">核心数学原理</h2>
+                
+                <div class="max-w-4xl mx-auto space-y-12">
+                    <!-- 纳维-斯托克斯方程 -->
+                    <div class="bg-white rounded-xl p-8 shadow-lg hover-lift">
+                        <h3 class="text-2xl font-bold mb-6 text-primary">纳维-斯托克斯方程</h3>
+                        <p class="text-lg mb-6">大气运动的基本方程是纳维-斯托克斯方程，它描述了流体的运动规律。对于天气预报模型，我们使用这些方程来预测大气的流动状态。</p>
+                        <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                            <p class="math-formula text-center text-lg">
+                                ρ(∂v/∂t + v·∇v) = -∇p + μ∇²v + ρg
+                            </p>
+                            <p class="text-center text-gray-500 mt-2">纳维-斯托克斯方程的矢量形式</p>
+                        </div>
+                        <p class="text-gray-700">其中：</p>
+                        <ul class="list-disc pl-6 mt-3 space-y-2 text-gray-700">
+                            <li>ρ 是流体密度</li>
+                            <li>v 是速度矢量</li>
+                            <li>p 是压力</li>
+                            <li>μ 是动力粘度</li>
+                            <li>g 是重力加速度</li>
+                        </ul>
+                    </div>
+
+                    <!-- 热力学能量方程 -->
+                    <div class="bg-white rounded-xl p-8 shadow-lg hover-lift">
+                        <h3 class="text-2xl font-bold mb-6 text-primary">热力学能量方程</h3>
+                        <p class="text-lg mb-6">能量方程描述了大气中热量的传递和变化，对于理解温度分布和变化至关重要。</p>
+                        <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                            <p class="math-formula text-center text-lg">
+                                ρc_p(∂T/∂t + v·∇T) = ∇·(k∇T) + Q
+                            </p>
+                            <p class="text-center text-gray-500 mt-2">热力学能量方程</p>
+                        </div>
+                        <p class="text-gray-700">其中：</p>
+                        <ul class="list-disc pl-6 mt-3 space-y-2 text-gray-700">
+                            <li>c_p 是定压比热容</li>
+                            <li>T 是温度</li>
+                            <li>k 是热导率</li>
+                            <li>Q 是热源项</li>
+                        </ul>
+                    </div>
+
+                    <!-- 连续性方程 -->
+                    <div class="bg-white rounded-xl p-8 shadow-lg hover-lift">
+                        <h3 class="text-2xl font-bold mb-6 text-primary">连续性方程</h3>
+                        <p class="text-lg mb-6">连续性方程基于质量守恒定律，描述了流体密度和速度之间的关系。</p>
+                        <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                            <p class="math-formula text-center text-lg">
+                                ∂ρ/∂t + ∇·(ρv) = 0
+                            </p>
+                            <p class="text-center text-gray-500 mt-2">连续性方程</p>
+                        </div>
+                        <p class="text-gray-700">这个方程表明，在任意控制体内，质量的变化率等于通过控制体表面的质量通量。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 实际应用案例 -->
+        <section class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-12 text-center text-dark">实际应用案例</h2>
+                
+                <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-10">
+                    <!-- 案例1：短期天气预报 -->
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-8 shadow-lg hover-lift">
+                        <div class="text-primary text-4xl mb-6">
+                            <i class="fa fa-cloud" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">短期天气预报</h3>
+                        <p class="text-lg mb-6">短期天气预报（0-3天）主要依赖于数值天气预报模型，通过求解偏微分方程组来预测未来的天气状况。</p>
+                        <div class="bg-white/70 p-4 rounded-lg mb-6">
+                            <p class="text-sm text-gray-700">关键技术：</p>
+                            <ul class="list-disc pl-5 mt-2 text-sm text-gray-700">
+                                <li>有限差分法求解偏微分方程</li>
+                                <li>谱方法提高计算效率</li>
+                                <li>四维数据同化技术</li>
+                            </ul>
+                        </div>
+                        <a href="#modeling" class="inline-flex items-center text-primary font-medium hover:underline">
+                            了解更多 <i class="fa fa-arrow-right ml-2" aria-hidden="true"></i>
+                        </a>
+                    </div>
+
+                    <!-- 案例2：气候变化预测 -->
+                    <div class="bg-gradient-to-br from-green-50 to-teal-50 rounded-xl p-8 shadow-lg hover-lift">
+                        <div class="text-green-600 text-4xl mb-6">
+                            <i class="fa fa-leaf" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">气候变化预测</h3>
+                        <p class="text-lg mb-6">气候模型是基于同样的物理原理，但覆盖更长时间尺度，用于研究气候变化趋势和可能的未来情景。</p>
+                        <div class="bg-white/70 p-4 rounded-lg mb-6">
+                            <p class="text-sm text-gray-700">关键技术：</p>
+                            <ul class="list-disc pl-5 mt-2 text-sm text-gray-700">
+                                <li>全球环流模型</li>
+                                <li>长时间积分和统计分析</li>
+                                <li>敏感性实验</li>
+                            </ul>
+                        </div>
+                        <a href="#climate" class="inline-flex items-center text-green-600 font-medium hover:underline">
+                            了解更多 <i class="fa fa-arrow-right ml-2" aria-hidden="true"></i>
+                        </a>
+                    </div>
+
+                    <!-- 案例3：极端天气预警 -->
+                    <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-8 shadow-lg hover-lift">
+                        <div class="text-amber-600 text-4xl mb-6">
+                            <i class="fa fa-bolt" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">极端天气预警</h3>
+                        <p class="text-lg mb-6">通过高分辨率数值模拟和实时数据同化，气象学家能够提前预警极端天气事件，如飓风、暴雨和强对流天气。</p>
+                        <div class="bg-white/70 p-4 rounded-lg mb-6">
+                            <p class="text-sm text-gray-700">关键技术：</p>
+                            <ul class="list-disc pl-5 mt-2 text-sm text-gray-700">
+                                <li>对流解析模型</li>
+                                <li>集合预报系统</li>
+                                <li>概率预报方法</li>
+                            </ul>
+                        </div>
+                        <a href="#extreme" class="inline-flex items-center text-amber-600 font-medium hover:underline">
+                            了解更多 <i class="fa fa-arrow-right ml-2" aria-hidden="true"></i>
+                        </a>
+                    </div>
+
+                    <!-- 案例4：空气质量预报 -->
+                    <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-8 shadow-lg hover-lift">
+                        <div class="text-purple-600 text-4xl mb-6">
+                            <i class="fa fa-globe" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">空气质量预报</h3>
+                        <p class="text-lg mb-6">空气质量预报结合了气象模型和化学传输模型，预测污染物的扩散和浓度变化。</p>
+                        <div class="bg-white/70 p-4 rounded-lg mb-6">
+                            <p class="text-sm text-gray-700">关键技术：</p>
+                            <ul class="list-disc pl-5 mt-2 text-sm text-gray-700">
+                                <li>大气化学传输模型</li>
+                                <li>反应动力学模拟</li>
+                                <li>气溶胶-云相互作用</li>
+                            </ul>
+                        </div>
+                        <a href="#airquality" class="inline-flex items-center text-purple-600 font-medium hover:underline">
+                            了解更多 <i class="fa fa-arrow-right ml-2" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 数值天气预报模型 -->
+        <section id="modeling" class="py-16 bg-neutral">
+            <div class="container mx-auto px-4">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-12 text-center text-dark">数值天气预报模型</h2>
+                
+                <div class="max-w-5xl mx-auto">
+                    <div class="grid md:grid-cols-5 gap-10 items-center mb-16">
+                        <div class="md:col-span-3">
+                            <h3 class="text-2xl font-bold mb-6 text-primary">从数学方程到天气预报</h3>
+                            <p class="text-lg mb-6">数值天气预报模型通过将大气划分为三维网格，在每个网格点上求解大气运动方程组，从而预测未来的天气状况。</p>
+                            <p class="text-lg mb-6">这个过程涉及大量的计算，需要超级计算机来完成，但它为我们提供了可靠的天气预报，帮助我们规划日常生活和应对极端天气事件。</p>
+                            <div class="flex flex-wrap gap-3">
+                                <span class="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">偏微分方程</span>
+                                <span class="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">数值积分</span>
+                                <span class="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">超级计算</span>
+                                <span class="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">数据同化</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2">
+                            <div class="rounded-xl overflow-hidden shadow-xl hover-lift">
+                                <img src="https://picsum.photos/id/1025/600/800" alt="天气预报模型示意图" class="w-full h-auto">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 数值方法 -->
+                    <div class="bg-white rounded-xl p-8 shadow-lg mb-16">
+                        <h3 class="text-2xl font-bold mb-6 text-primary">常用数值方法</h3>
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="border border-gray-200 rounded-lg p-6 hover:border-primary/30 transition-custom">
+                                <h4 class="font-bold text-lg mb-3">有限差分法</h4>
+                                <p class="text-gray-700">用差商近似导数，将偏微分方程转化为代数方程组求解。</p>
+                            </div>
+                            <div class="border border-gray-200 rounded-lg p-6 hover:border-primary/30 transition-custom">
+                                <h4 class="font-bold text-lg mb-3">有限元法</h4>
+                                <p class="text-gray-700">将计算区域划分为有限元，通过变分原理求解控制方程。</p>
+                            </div>
+                            <div class="border border-gray-200 rounded-lg p-6 hover:border-primary/30 transition-custom">
+                                <h4 class="font-bold text-lg mb-3">谱方法</h4>
+                                <p class="text-gray-700">在球谐函数空间中求解方程，特别适用于全球尺度的模拟。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 数据同化交互演示 -->
+                    <div class="bg-white rounded-xl p-8 shadow-lg">
+                        <h3 class="text-2xl font-bold mb-6 text-primary">数据同化交互演示</h3>
+                        <p class="text-lg mb-6">数据同化是将观测数据与模型预测结合的过程，提高预报的准确性。以下是一个简化的二维数据同化演示：</p>
+                        
+                        <div class="mb-6">
+                            <canvas id="dataAssimilationCanvas" class="border border-gray-200 rounded-lg w-full" height="400"></canvas>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-4 justify-center">
+                            <button id="addObservation" class="px-6 py-2 bg-primary text-white font-medium rounded-lg shadow hover:bg-primary/90 transition-custom hover-lift">
+                                添加观测数据
+                            </button>
+                            <button id="clearObservations" class="px-6 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg shadow hover:bg-gray-300 transition-custom hover-lift">
+                                清除观测数据
+                            </button>
+                        </div>
+                        
+                        <p class="text-center text-sm text-gray-500 mt-4">点击按钮添加观测数据，观察数据如何影响分析结果</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 气候变化预测 -->
+        <section id="climate" class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-12 text-center text-dark">气候变化预测</h2>
+                
+                <div class="max-w-5xl mx-auto">
+                    <div class="grid md:grid-cols-2 gap-10 mb-16 items-center">
+                        <div class="order-2 md:order-1">
+                            <div class="rounded-xl overflow-hidden shadow-xl hover-lift">
+                                <img src="https://picsum.photos/id/1024/800/600" alt="气候变化示意图" class="w-full h-auto">
+                            </div>
+                        </div>
+                        <div class="order-1 md:order-2">
+                            <h3 class="text-2xl font-bold mb-6 text-primary">长期气候趋势分析</h3>
+                            <p class="text-lg mb-6">气候模型是基于同样的物理原理，但覆盖更长时间尺度（几十年到几个世纪），用于研究气候变化趋势和可能的未来情景。</p>
+                            <p class="text-lg mb-6">通过不同排放情景下的模拟，科学家能够预测未来的温度变化、降水模式变化、海平面上升等气候变化影响。</p>
+                            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+                                <p class="text-green-800"><i class="fa fa-info-circle mr-2" aria-hidden="true"></i> 气候模型是基于物理定律的数学模型，不是简单的统计外推。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 气候变化数据可视化 -->
+                    <div class="bg-white rounded-xl p-8 shadow-lg">
+                        <h3 class="text-2xl font-bold mb-6 text-primary">气候变化数据可视化</h3>
+                        <p class="text-lg mb-6">以下是不同气候变量的长期变化趋势可视化：</p>
+                        
+                        <div class="mb-4">
+                            <h4 id="chartTitle" class="text-xl font-medium mb-2">全球温度变化趋势</h4>
+                            <p id="chartUnit" class="text-gray-500 mb-4">°C (相对于1951-1980平均)</p>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <canvas id="climateChangeCanvas" class="border border-gray-200 rounded-lg w-full" height="400"></canvas>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-4 justify-center">
+                            <button id="tempButton" class="px-6 py-2 bg-primary text-white font-medium rounded-lg shadow hover:bg-primary/90 transition-custom hover-lift">
+                                温度变化
+                            </button>
+                            <button id="precipButton" class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg shadow hover:bg-blue-700 transition-custom hover-lift">
+                                降水量变化
+                            </button>
+                            <button id="co2Button" class="px-6 py-2 bg-green-600 text-white font-medium rounded-lg shadow hover:bg-green-700 transition-custom hover-lift">
+                                CO₂浓度变化
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 未来发展趋势 -->
+        <section class="py-16 bg-gradient-to-br from-blue-900 to-indigo-900 text-white">
+            <div class="container mx-auto px-4">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-12 text-center">未来发展趋势</h2>
+                
+                <div class="max-w-5xl mx-auto grid md:grid-cols-3 gap-8">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-8 hover:bg-white/15 transition-custom hover-lift">
+                        <div class="text-3xl mb-6">
+                            <i class="fa fa-microchip" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">高性能计算</h3>
+                        <p class="text-white/90">随着超级计算机技术的发展，天气预报模型的分辨率和准确性将不断提高，能够捕捉更细微的天气现象。</p>
+                    </div>
+                    
+                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-8 hover:bg-white/15 transition-custom hover-lift">
+                        <div class="text-3xl mb-6">
+                            <i class="fa fa-line-chart" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">机器学习融合</h3>
+                        <p class="text-white/90">机器学习技术将与传统物理模型相结合，提高预报准确性，特别是在数据稀疏区域和极端天气事件预报方面。</p>
+                    </div>
+                    
+                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-8 hover:bg-white/15 transition-custom hover-lift">
+                        <div class="text-3xl mb-6">
+                            <i class="fa fa-satellite" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">多源数据融合</h3>
+                        <p class="text-white/90">卫星、雷达、地面观测等多源数据的融合将进一步提高预报精度，特别是在海洋、高原等观测稀疏地区。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 学习资源 -->
+        <section class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-12 text-center text-dark">学习资源</h2>
+                
+                <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
+                    <a href="#" class="block bg-neutral rounded-xl p-8 shadow-lg hover:shadow-xl transition-custom hover-lift">
+                        <div class="text-primary text-3xl mb-4">
+                            <i class="fa fa-book" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">数值天气预报基础</h3>
+                        <p class="text-gray-600 mb-4">了解数值天气预报的基本原理和方法，包括数学模型、数值解法和数据同化技术。</p>
+                        <span class="inline-flex items-center text-primary font-medium">
+                            查看资源 <i class="fa fa-arrow-right ml-2" aria-hidden="true"></i>
+                        </span>
+                    </a>
+                    
+                    <a href="#" class="block bg-neutral rounded-xl p-8 shadow-lg hover:shadow-xl transition-custom hover-lift">
+                        <div class="text-primary text-3xl mb-4">
+                            <i class="fa fa-code" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">计算流体力学</h3>
+                        <p class="text-gray-600 mb-4">深入学习计算流体力学的理论和实践，这是天气预报模型的核心技术基础。</p>
+                        <span class="inline-flex items-center text-primary font-medium">
+                            查看资源 <i class="fa fa-arrow-right ml-2" aria-hidden="true"></i>
+                        </span>
+                    </a>
+                    
+                    <a href="#" class="block bg-neutral rounded-xl p-8 shadow-lg hover:shadow-xl transition-custom hover-lift">
+                        <div class="text-primary text-3xl mb-4">
+                            <i class="fa fa-cloud" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">大气物理学</h3>
+                        <p class="text-gray-600 mb-4">了解大气的物理特性和运动规律，这是理解天气预报模型的重要基础。</p>
+                        <span class="inline-flex items-center text-primary font-medium">
+                            查看资源 <i class="fa fa-arrow-right ml-2" aria-hidden="true"></i>
+                        </span>
+                    </a>
+                    
+                    <a href="#" class="block bg-neutral rounded-xl p-8 shadow-lg hover:shadow-xl transition-custom hover-lift">
+                        <div class="text-primary text-3xl mb-4">
+                            <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">气候模型与气候变化</h3>
+                        <p class="text-gray-600 mb-4">学习气候模型的构建原理和应用，以及如何使用这些模型研究气候变化问题。</p>
+                        <span class="inline-flex items-center text-primary font-medium">
+                            查看资源 <i class="fa fa-arrow-right ml-2" aria-hidden="true"></i>
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white pt-16 pb-8">
+        <div class="container mx-auto px-4">
+            <div class="max-w-5xl mx-auto grid md:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <div class="flex items-center gap-2 text-white font-bold text-xl mb-6">
+                        <i class="fa fa-calculator" aria-hidden="true"></i>
+                        <span>微积分教程</span>
+                    </div>
+                    <p class="text-gray-400 mb-6">探索微积分在各个领域的应用，从基础概念到前沿研究。</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-custom">
+                            <i class="fa fa-facebook" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-custom">
+                            <i class="fa fa-twitter" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-custom">
+                            <i class="fa fa-instagram" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-custom">
+                            <i class="fa fa-linkedin" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-lg mb-6">快速链接</h4>
+                    <ul class="space-y-3">
+                        <li><a href="calculus-tutorial.html" class="text-gray-400 hover:text-white transition-custom">首页</a></li>
+                        <li><a href="calculus-tutorial.html#concepts" class="text-gray-400 hover:text-white transition-custom">核心概念</a></li>
+                        <li><a href="calculus-tutorial.html#applications" class="text-gray-400 hover:text-white transition-custom">实际应用</a></li>
+                        <li><a href="calculus-tutorial.html#tutorials" class="text-gray-400 hover:text-white transition-custom">学习教程</a></li>
+                        <li><a href="calculus-tutorial.html#resources" class="text-gray-400 hover:text-white transition-custom">资源</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-lg mb-6">应用领域</h4>
+                    <ul class="space-y-3">
+                        <li><a href="physics-applications.html" class="text-gray-400 hover:text-white transition-custom">物理学应用</a></li>
+                        <li><a href="economics-applications.html" class="text-gray-400 hover:text-white transition-custom">经济学应用</a></li>
+                        <li><a href="engineering-applications.html" class="text-gray-400 hover:text-white transition-custom">工程学应用</a></li>
+                        <li><a href="medical-imaging.html" class="text-gray-400 hover:text-white transition-custom">医学成像应用</a></li>
+                        <li><a href="computer-graphics.html" class="text-gray-400 hover:text-white transition-custom">计算机图形学应用</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-lg mb-6">联系我们</h4>
+                    <ul class="space-y-3">
+                        <li class="flex items-center gap-3">
+                            <i class="fa fa-envelope text-gray-400" aria-hidden="true"></i>
+                            <a href="mailto:info@calculus-tutorial.com" class="text-gray-400 hover:text-white transition-custom">info@calculus-tutorial.com</a>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa fa-phone text-gray-400" aria-hidden="true"></i>
+                            <a href="tel:+1234567890" class="text-gray-400 hover:text-white transition-custom">+1 (234) 567-890</a>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa fa-map-marker text-gray-400 mt-1" aria-hidden="true"></i>
+                            <span class="text-gray-400">123 微积分大道，数学城，知识国</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <p class="text-gray-400 mb-4 md:mb-0">© 2023 微积分教程网站. 保留所有权利.</p>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-white transition-custom">隐私政策</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-custom">使用条款</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-custom">Cookie政策</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 交互脚本 -->
+    <script>
+        // 移动端菜单切换
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('py-2', 'shadow-md');
+                header.classList.remove('py-3', 'shadow-sm');
+            } else {
+                header.classList.add('py-3', 'shadow-sm');
+                header.classList.remove('py-2', 'shadow-md');
+            }
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    
+                    // 关闭移动端菜单
+                    document.getElementById('mobile-menu').classList.add('hidden');
+                }
+            });
+        });
+
+        // 数据同化演示
+        let trueState = []; // 真实状态
+        let analysisState = []; // 分析状态（融合了观测数据的最优估计）
+        let observations = []; // 观测数据
+        
+        // 初始化数据同化演示
+        function initDataAssimilation() {
+            const canvas = document.getElementById('dataAssimilationCanvas');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = 400;
+            
+            const gridWidth = Math.floor(width / 10);
+            const gridHeight = Math.floor(height / 10);
+            
+            // 生成真实状态（使用二维高斯分布模拟大气温度分布）
+            trueState = [];
+            analysisState = [];
+            observations = [];
+            
+            const centerX = gridWidth / 2;
+            const centerY = gridHeight / 2;
+            const sigma = Math.min(gridWidth, gridHeight) / 4;
+            
+            for (let y = 0; y < gridHeight; y++) {
+                trueState[y] = [];
+                analysisState[y] = [];
+                for (let x = 0; x < gridWidth; x++) {
+                    // 生成二维高斯分布
+                    const dx = x - centerX;
+                    const dy = y - centerY;
+                    const distanceSquared = dx * dx + dy * dy;
+                    const value = 100 * Math.exp(-distanceSquared / (2 * sigma * sigma)) + 50;
+                    
+                    trueState[y][x] = value;
+                    // 初始分析状态等于真实状态（无观测数据时）
+                    analysisState[y][x] = value;
+                }
+            }
+        }
+        
+        // 绘制数据同化结果
+        function drawDataAssimilation() {
+            const canvas = document.getElementById('dataAssimilationCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = 400;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制分析状态（融合了观测数据的最优估计）
+            for (let y = 0; y < analysisState.length; y++) {
+                for (let x = 0; x < analysisState[y].length; x++) {
+                    const value = analysisState[y][x];
+                    
+                    // 将值映射到颜色
+                    const normalizedValue = (value - 50) / 100; // 映射到0-1范围
+                    const r = Math.floor(normalizedValue * 255);
+                    const g = Math.floor(100 + normalizedValue * 50);
+                    const b = Math.floor((1 - normalizedValue) * 255);
+                    
+                    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                    ctx.fillRect(x * 10, y * 10, 10, 10);
+                }
+            }
+            
+            // 绘制观测数据点
+            observations.forEach(obs => {
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(obs.x, obs.y, 5, 0, 2 * Math.PI);
+                ctx.stroke();
+                
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(obs.x, obs.y, 2, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+            
+            // 显示说明文字
+            ctx.fillStyle = '#000';
+            ctx.font = '14px Arial';
+            ctx.fillText('白色点表示观测数据', 20, height - 20);
+        }
+        
+        // 添加观测按钮
+        document.getElementById('addObservation').addEventListener('click', function() {
+            const canvas = document.getElementById('dataAssimilationCanvas');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = 400;
+            
+            // 随机添加观测点
+            const x = Math.random() * width;
+            const y = Math.random() * height;
+            
+            // 计算观测值（真实值加上观测误差）
+            const gridX = Math.floor(x / 10);
+            const gridY = Math.floor(y / 10);
+            const trueValue = trueState[gridY][gridX];
+            const obsError = (Math.random() - 0.5) * 5; // 观测误差
+            const obsValue = trueValue + obsError;
+            
+            // 添加观测点
+            observations.push({ x, y, value: obsValue });
+            
+            // 简化的数据分析过程（使用最优插值）
+            // 这里使用简化的卡尔曼滤波更新
+            for (let j = 0; j < analysisState.length; j++) {
+                for (let i = 0; i < analysisState[j].length; i++) {
+                    let totalWeight = 0;
+                    let weightedSum = analysisState[j][i] * 0.5; // 模型状态的权重
+                    
+                    observations.forEach(obs => {
+                        const dx = i * 10 - obs.x;
+                        const dy = j * 10 - obs.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        // 距离越近，权重越大
+                        const weight = Math.exp(-Math.pow(distance / 50, 2)) * 0.5 / observations.length;
+                        totalWeight += weight;
+                        weightedSum += obs.value * weight;
+                    });
+                    
+                    // 归一化权重并更新分析状态
+                    if (totalWeight > 0) {
+                        analysisState[j][i] = weightedSum / (0.5 + totalWeight);
+                    }
+                }
+            }
+            
+            drawDataAssimilation();
+        });
+        
+        document.getElementById('clearObservations').addEventListener('click', function() {
+            initDataAssimilation();
+            drawDataAssimilation();
+        });
+        
+        // 气候变化画布
+        const climateChangeCtx = document.getElementById('climateChangeCanvas').getContext('2d');
+        let dataSource = 'temperature';
+        
+        // 模拟气候变化数据
+        function generateClimateData(type) {
+            const years = 100;
+            const data = [];
+            let trend;
+            
+            for (let year = 0; year < years; year++) {
+                let value;
+                
+                if (type === 'temperature') {
+                    // 全球温度数据（摄氏度相对于1951-1980平均）
+                    trend = 0.02 * year; // 线性趋势
+                    const naturalVariation = 0.2 * Math.sin(year * 0.1) + 0.1 * Math.sin(year * 0.03); // 自然变化
+                    const randomNoise = (Math.random() - 0.5) * 0.1; // 随机噪声
+                    value = trend + naturalVariation + randomNoise - 0.3; // 调整基线
+                } else if (type === 'precipitation') {
+                    // 降水量数据（标准化单位）
+                    trend = 0.005 * year; // 线性趋势
+                    const seasonalCycle = 0.5 * Math.sin(year * 0.05); // 季节性周期
+                    const randomNoise = (Math.random() - 0.5) * 0.2; // 随机噪声
+                    value = 1 + trend + seasonalCycle + randomNoise;
+                } else if (type === 'co2') {
+                    // CO₂浓度数据（ppm）
+                    trend = 1.5 * year + 280; // 指数增长近似
+                    const seasonalCycle = 5 * Math.sin(year * 0.1); // 季节性周期
+                    value = trend + seasonalCycle;
+                }
+                
+                data.push(value);
+            }
+            
+            return data;
+        }
+        
+        function drawClimateChange() {
+            const canvas = document.getElementById('climateChangeCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = 400;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 生成数据
+            const data = generateClimateData(dataSource);
+            
+            // 计算数据范围
+            const minValue = Math.min(...data);
+            const maxValue = Math.max(...data);
+            const range = maxValue - minValue;
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(50, 50);
+            ctx.lineTo(50, height - 50);
+            ctx.lineTo(width - 30, height - 50);
+            ctx.stroke();
+            
+            // 绘制网格
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const x = 50 + i * (width - 80) / 10;
+                ctx.beginPath();
+                ctx.moveTo(x, 50);
+                ctx.lineTo(x, height - 50);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= 5; i++) {
+                const y = 50 + i * (height - 100) / 5;
+                ctx.beginPath();
+                ctx.moveTo(50, y);
+                ctx.lineTo(width - 30, y);
+                ctx.stroke();
+            }
+            
+            // 绘制数据曲线
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i < data.length; i++) {
+                const x = 50 + i * (width - 80) / (data.length - 1);
+                const normalizedValue = (data[i] - minValue) / range;
+                const y = height - 50 - normalizedValue * (height - 100);
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            
+            ctx.stroke();
+        }
+
+        // 初始化图表
+        function initClimateChangeChart() {
+            drawClimateChange();
+        }
+
+        // 为数据源切换按钮添加事件监听
+        if (document.getElementById('tempButton')) {
+            document.getElementById('tempButton').addEventListener('click', function() {
+                dataSource = 'temperature';
+                if (document.getElementById('chartTitle')) {
+                    document.getElementById('chartTitle').textContent = '全球温度变化趋势';
+                }
+                if (document.getElementById('chartUnit')) {
+                    document.getElementById('chartUnit').textContent = '°C (相对于1951-1980平均)';
+                }
+                drawClimateChange();
+            });
+        }
+
+        if (document.getElementById('precipButton')) {
+            document.getElementById('precipButton').addEventListener('click', function() {
+                dataSource = 'precipitation';
+                if (document.getElementById('chartTitle')) {
+                    document.getElementById('chartTitle').textContent = '全球降水量变化趋势';
+                }
+                if (document.getElementById('chartUnit')) {
+                    document.getElementById('chartUnit').textContent = '标准化单位';
+                }
+                drawClimateChange();
+            });
+        }
+
+        if (document.getElementById('co2Button')) {
+            document.getElementById('co2Button').addEventListener('click', function() {
+                dataSource = 'co2';
+                if (document.getElementById('chartTitle')) {
+                    document.getElementById('chartTitle').textContent = '大气CO₂浓度变化趋势';
+                }
+                if (document.getElementById('chartUnit')) {
+                    document.getElementById('chartUnit').textContent = 'ppm';
+                }
+                drawClimateChange();
+            });
+        }
+
+        // 页面加载时初始化所有图表
+        window.addEventListener('load', function() {
+            initDataAssimilation();
+            drawDataAssimilation();
+            initClimateChangeChart();
+        });
+
+        // 窗口大小变化时重新绘制图表
+        window.addEventListener('resize', function() {
+            drawDataAssimilation();
+            drawClimateChange();
+        });
+    </script>
+</body>
+</html>

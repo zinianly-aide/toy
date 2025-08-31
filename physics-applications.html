@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微积分在物理学中的应用 | 微积分直观理解</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Chart.js用于数据可视化 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    
+    <!-- 配置Tailwind自定义颜色和字体 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        accent: '#f97316',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        math: ['STIX Two Math', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .canvas-container {
+                @apply relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg;
+            }
+            .section-fade {
+                @apply opacity-0 translate-y-8 transition-all duration-700;
+            }
+            .section-visible {
+                @apply opacity-100 translate-y-0;
+            }
+        }
+    </style>
+    
+    <style>
+        /* 基础样式 */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            background-color: #f8fafc;
+        }
+        
+        /* 数学符号显示优化 */
+        .math-expression {
+            font-family: 'STIX Two Math', serif;
+            font-size: 1.1em;
+        }
+        
+        /* Canvas容器样式 */
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 滚动条样式优化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+
+<body class="font-sans text-dark">
+    <!-- 导航栏 -->
+    <header id="navbar" class="fixed w-full z-50 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-calculator text-primary text-2xl"></i>
+                <h1 class="text-xl md:text-2xl font-bold text-primary">微积分直观理解</h1>
+            </div>
+            
+            <!-- 桌面导航 -->
+            <nav class="hidden md:flex space-x-8">
+                <a href="calculus-tutorial.html#intro" class="text-dark/80 hover:text-primary transition-colors">简介</a>
+                <a href="calculus-tutorial.html#derivative" class="text-dark/80 hover:text-primary transition-colors">导数</a>
+                <a href="calculus-tutorial.html#integral" class="text-dark/80 hover:text-primary transition-colors">积分</a>
+                <a href="calculus-tutorial.html#theorem" class="text-dark/80 hover:text-primary transition-colors">微积分基本定理</a>
+                <a href="calculus-tutorial.html#applications" class="text-primary font-medium">应用</a>
+            </nav>
+            
+            <!-- 移动端菜单按钮 -->
+            <button id="menu-toggle" class="md:hidden text-dark text-xl">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+        
+        <!-- 移动端导航菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="calculus-tutorial.html#intro" class="py-2 text-dark/80 hover:text-primary transition-colors">简介</a>
+                <a href="calculus-tutorial.html#derivative" class="py-2 text-dark/80 hover:text-primary transition-colors">导数</a>
+                <a href="calculus-tutorial.html#integral" class="py-2 text-dark/80 hover:text-primary transition-colors">积分</a>
+                <a href="calculus-tutorial.html#theorem" class="py-2 text-dark/80 hover:text-primary transition-colors">微积分基本定理</a>
+                <a href="calculus-tutorial.html#applications" class="py-2 text-primary font-medium">应用</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section class="pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-br from-primary/5 to-secondary/5">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-dark text-shadow">
+                    微积分在<span class="text-primary">物理学</span>中的应用
+                </h1>
+                <p class="text-lg md:text-xl text-dark/70 mb-10">
+                    探索微积分如何帮助我们理解和描述物理世界的运动规律与变化过程
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="#kinematics" class="px-8 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-1">
+                        开始探索 <i class="fa fa-arrow-right ml-2"></i>
+                    </a>
+                    <a href="calculus-tutorial.html#applications" class="px-8 py-3 bg-white text-primary border border-primary rounded-lg font-medium hover:bg-primary/5 transition-all">
+                        返回应用列表
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-4 py-12">
+        <!-- 运动学部分 -->
+        <section id="kinematics" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-primary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">运动学：描述物体的运动</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-10">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">位移、速度与加速度的关系</h3>
+                    <p class="mb-4">
+                        在运动学中，微积分是理解物体运动的核心工具。通过微积分，我们可以建立位移、速度和加速度之间的精确关系。
+                    </p>
+                    <p class="mb-4">
+                        位移函数 <span class="math-expression">s(t)</span>、速度函数 <span class="math-expression">v(t)</span> 和加速度函数 <span class="math-expression">a(t)</span> 之间的关系：
+                    </p>
+                    <div class="space-y-4 mb-6">
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <span class="math-expression">v(t) = ds/dt</span> （速度是位移的导数）
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <span class="math-expression">a(t) = dv/dt = d²s/dt²</span> （加速度是速度的导数，也是位移的二阶导数）
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <span class="math-expression">v(t) = v₀ + ∫₀ᵗ a(τ) dτ</span> （通过积分加速度求速度）
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <span class="math-expression">s(t) = s₀ + ∫₀ᵗ v(τ) dτ</span> （通过积分速度求位移）
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="canvas-container h-96">
+                    <canvas id="kinematicsCanvas"></canvas>
+                    <div class="absolute top-3 right-3 flex space-x-2">
+                        <button id="prevMotion" class="p-2 bg-primary/10 hover:bg-primary/20 rounded-full transition-colors">
+                            <i class="fa fa-arrow-left text-primary"></i>
+                        </button>
+                        <button id="nextMotion" class="p-2 bg-primary/10 hover:bg-primary/20 rounded-full transition-colors">
+                            <i class="fa fa-arrow-right text-primary"></i>
+                        </button>
+                    </div>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        观察位移、速度与加速度的关系
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 动力学部分 -->
+        <section id="dynamics" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-secondary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">动力学：力与运动的关系</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-10">
+                <div class="canvas-container h-96">
+                    <canvas id="dynamicsCanvas"></canvas>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        牛顿第二定律：F = ma
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">牛顿运动定律与微积分</h3>
+                    <p class="mb-4">
+                        牛顿第二定律 <span class="math-expression">F = ma</span> 是动力学的基础，可以用微积分表示为：
+                    </p>
+                    <div class="bg-white p-4 rounded-lg shadow-sm mb-6 text-center">
+                        <span class="math-expression text-xl">F = m · d²s/dt²</span>
+                    </div>
+                    <p class="mb-4">
+                        通过求解这个微分方程，我们可以预测物体在各种力的作用下的运动轨迹。
+                    </p>
+                    <h4 class="font-semibold mt-6 mb-2">常见应用场景：</h4>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>自由落体运动</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>抛物运动</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>弹簧振子</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>圆周运动</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 能量与功部分 -->
+        <section id="energy" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-accent rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">能量与功</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-10">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">功的计算与能量转换</h3>
+                    <p class="mb-4">
+                        在物理学中，功定义为力在位移上的累积效应。当力随位置变化时，我们需要用积分来计算功：
+                    </p>
+                    <div class="bg-white p-4 rounded-lg shadow-sm mb-6 text-center">
+                        <span class="math-expression text-xl">W = ∫ₐᵇ F(x) · dx</span>
+                    </div>
+                    <p class="mb-4">
+                        这个积分表示力F从位置a到位置b所做的功。
+                    </p>
+                    <h4 class="font-semibold mt-6 mb-2">能量守恒定律：</h4>
+                    <p class="mb-4">
+                        能量守恒定律可以用微积分表述为：在一个封闭系统中，能量的变化率等于外力对系统所做功的功率。
+                    </p>
+                    <div class="bg-white p-4 rounded-lg shadow-sm mb-6 text-center">
+                        <span class="math-expression text-xl">dE/dt = P</span>
+                    </div>
+                </div>
+                
+                <div class="canvas-container h-96">
+                    <canvas id="energyCanvas"></canvas>
+                    <div class="absolute top-3 left-3 flex flex-col space-y-2">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm bg-white px-2 py-1 rounded shadow-sm">
+                                <input type="checkbox" id="showKinetic" checked class="mr-1">
+                                <label for="showKinetic">动能</label>
+                            </span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm bg-white px-2 py-1 rounded shadow-sm">
+                                <input type="checkbox" id="showPotential" checked class="mr-1">
+                                <label for="showPotential">势能</label>
+                            </span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm bg-white px-2 py-1 rounded shadow-sm">
+                                <input type="checkbox" id="showTotal" checked class="mr-1">
+                                <label for="showTotal">总能量</label>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        单摆系统中的能量转换
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 电磁学部分 -->
+        <section id="electromagnetism" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-primary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">电磁学中的微积分</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-10">
+                <div class="canvas-container h-96">
+                    <canvas id="electromagnetismCanvas"></canvas>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        电场强度与电势的关系
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">麦克斯韦方程组</h3>
+                    <p class="mb-4">
+                        麦克斯韦方程组是电磁学的基础，它们全部是用微积分表述的。其中两个重要关系是：
+                    </p>
+                    <div class="space-y-4 mb-6">
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <span class="math-expression">E = -∇V</span> （电场是电势的负梯度）
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <span class="math-expression">∇·D = ρ</span> （高斯定律，电位移的散度等于电荷密度）
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <span class="math-expression">∇×E = -∂B/∂t</span> （法拉第电磁感应定律）
+                        </div>
+                    </div>
+                    <h4 class="font-semibold mt-6 mb-2">实际应用：</h4>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>电路分析与设计</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>电磁波传播</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>天线设计</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 流体力学部分 -->
+        <section id="fluid-dynamics" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-secondary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">流体力学</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-10">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">连续性方程与伯努利方程</h3>
+                    <p class="mb-4">
+                        流体力学中的基本方程都是用微积分表述的。连续性方程描述了质量守恒：
+                    </p>
+                    <div class="bg-white p-4 rounded-lg shadow-sm mb-6 text-center">
+                        <span class="math-expression text-xl">∇·(ρv) + ∂ρ/∂t = 0</span>
+                    </div>
+                    <p class="mb-4">
+                        对于不可压缩流体，连续性方程简化为：
+                    </p>
+                    <div class="bg-white p-4 rounded-lg shadow-sm mb-6 text-center">
+                        <span class="math-expression text-xl">∇·v = 0</span>
+                    </div>
+                    <p class="mb-4">
+                        伯努利方程描述了理想流体的能量守恒：
+                    </p>
+                    <div class="bg-white p-4 rounded-lg shadow-sm mb-6 text-center">
+                        <span class="math-expression text-xl">p + ½ρv² + ρgh = 常数</span>
+                    </div>
+                </div>
+                
+                <div class="canvas-container h-96">
+                    <canvas id="fluidDynamicsCanvas"></canvas>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        流体流过不同截面积管道的速度变化
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 实际案例研究 -->
+        <section id="case-studies" class="max-w-5xl mx-auto mb-10 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-accent rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">实际案例研究</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- 案例1：火箭推进 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+                    <div class="h-48 bg-primary/10 flex items-center justify-center">
+                        <i class="fa fa-rocket text-primary text-6xl"></i>
+                    </div>
+                    <div class="p-5">
+                        <h3 class="text-xl font-semibold mb-2">火箭推进</h3>
+                        <p class="text-dark/70 mb-4">
+                            火箭推进系统的设计依赖于微积分来计算推力、燃料消耗率和加速度。通过求解变质量系统的运动方程，工程师可以确定火箭的最佳设计参数。
+                        </p>
+                        <div class="bg-primary/5 p-3 rounded-lg">
+                            <span class="math-expression">F = v_e * dm/dt - mg</span>
+                            <p class="text-sm text-dark/60 mt-1">火箭推力方程，其中v_e是排气速度，dm/dt是燃料消耗率</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 案例2：卫星轨道 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+                    <div class="h-48 bg-secondary/10 flex items-center justify-center">
+                        <i class="fa fa-globe text-secondary text-6xl"></i>
+                    </div>
+                    <div class="p-5">
+                        <h3 class="text-xl font-semibold mb-2">卫星轨道</h3>
+                        <p class="text-dark/70 mb-4">
+                            卫星轨道的计算和预测需要求解牛顿万有引力定律下的微分方程。这些计算对于卫星定位、通信和地球观测至关重要。
+                        </p>
+                        <div class="bg-secondary/5 p-3 rounded-lg">
+                            <span class="math-expression">F = G * (m1*m2)/r²</span>
+                            <p class="text-sm text-dark/60 mt-1">万有引力定律，描述了两个物体之间的引力与距离的关系</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="max-w-5xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                    <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                        <i class="fa fa-calculator text-primary text-2xl"></i>
+                        <h2 class="text-xl font-bold">微积分直观理解</h2>
+                    </div>
+                    <div class="flex space-x-6">
+                        <a href="calculus-tutorial.html#intro" class="text-white/70 hover:text-primary transition-colors">简介</a>
+                        <a href="calculus-tutorial.html#derivative" class="text-white/70 hover:text-primary transition-colors">导数</a>
+                        <a href="calculus-tutorial.html#integral" class="text-white/70 hover:text-primary transition-colors">积分</a>
+                        <a href="calculus-tutorial.html#applications" class="text-white/70 hover:text-primary transition-colors">应用</a>
+                    </div>
+                </div>
+                
+                <div class="border-t border-white/10 pt-8 text-center text-white/60 text-sm">
+                    <p>© 2023 微积分直观理解. 本网站旨在通过交互式可视化帮助理解微积分概念。</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript代码 -->
+    <script>
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('py-2', 'shadow');
+                navbar.classList.remove('py-3');
+            } else {
+                navbar.classList.add('py-3');
+                navbar.classList.remove('py-2', 'shadow');
+            }
+        });
+        
+        // 移动端菜单切换
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // 滚动动画
+        const sections = document.querySelectorAll('.section-fade');
+        
+        function checkVisibility() {
+            sections.forEach(section => {
+                const sectionTop = section.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                
+                if (sectionTop < windowHeight * 0.85) {
+                    section.classList.add('section-visible');
+                }
+            });
+        }
+        
+        // 初始检查
+        window.addEventListener('load', checkVisibility);
+        // 滚动时检查
+        window.addEventListener('scroll', checkVisibility);
+        
+        // 运动学画布
+        const kinematicsCtx = document.getElementById('kinematicsCanvas').getContext('2d');
+        let currentMotionIndex = 0;
+        const motionTypes = [
+            { name: '匀速直线运动', position: t => 50 + t*2, velocity: t => 2, acceleration: t => 0 },
+            { name: '匀加速直线运动', position: t => 50 + t + 0.5*t*t, velocity: t => 1 + t, acceleration: t => 1 },
+            { name: '简谐振动', position: t => 100 + 50*Math.cos(t), velocity: t => -50*Math.sin(t), acceleration: t => -50*Math.cos(t) }
+        ];
+        
+        function drawKinematics() {
+            const canvas = document.getElementById('kinematicsCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = canvas.parentElement.clientHeight;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            const motion = motionTypes[currentMotionIndex];
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(50, 50);
+            ctx.lineTo(50, height - 50);
+            ctx.lineTo(width - 30, height - 50);
+            ctx.stroke();
+            
+            // 绘制网格
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const x = 50 + i * (width - 80) / 10;
+                ctx.beginPath();
+                ctx.moveTo(x, 50);
+                ctx.lineTo(x, height - 50);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= 6; i++) {
+                const y = 50 + i * (height - 100) / 6;
+                ctx.beginPath();
+                ctx.moveTo(50, y);
+                ctx.lineTo(width - 30, y);
+                ctx.stroke();
+            }
+            
+            // 绘制位置曲线
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let t = 0; t <= 10; t += 0.1) {
+                const x = 50 + t * (width - 80) / 10;
+                const pos = motion.position(t);
+                const y = height - 50 - (pos - 50) * (height - 100) / 200;
+                if (t === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // 绘制速度曲线
+            ctx.strokeStyle = '#7c3aed';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let t = 0; t <= 10; t += 0.1) {
+                const x = 50 + t * (width - 80) / 10;
+                const vel = motion.velocity(t);
+                const y = height - 50 - (vel + 50) * (height - 100) / 200;
+                if (t === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // 绘制加速度曲线
+            ctx.strokeStyle = '#f97316';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let t = 0; t <= 10; t += 0.1) {
+                const x = 50 + t * (width - 80) / 10;
+                const acc = motion.acceleration(t);
+                const y = height - 50 - (acc + 50) * (height - 100) / 200;
+                if (t === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // 绘制图例
+            ctx.fillStyle = '#2563eb';
+            ctx.fillRect(30, 20, 15, 10);
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('位置', 50, 30);
+            
+            ctx.fillStyle = '#7c3aed';
+            ctx.fillRect(100, 20, 15, 10);
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('速度', 120, 30);
+            
+            ctx.fillStyle = '#f97316';
+            ctx.fillRect(170, 20, 15, 10);
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('加速度', 190, 30);
+            
+            // 显示当前运动类型
+            ctx.fillStyle = '#000';
+            ctx.font = '14px Arial';
+            ctx.fillText(motion.name, width - 100, 30);
+        }
+        
+        // 运动学控制按钮
+        document.getElementById('prevMotion').addEventListener('click', function() {
+            currentMotionIndex = (currentMotionIndex - 1 + motionTypes.length) % motionTypes.length;
+            drawKinematics();
+        });
+        
+        document.getElementById('nextMotion').addEventListener('click', function() {
+            currentMotionIndex = (currentMotionIndex + 1) % motionTypes.length;
+            drawKinematics();
+        });
+        
+        // 动力学画布
+        const dynamicsCtx = document.getElementById('dynamicsCanvas').getContext('2d');
+        
+        function drawDynamics() {
+            const canvas = document.getElementById('dynamicsCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = canvas.parentElement.clientHeight;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(50, 50);
+            ctx.lineTo(50, height - 50);
+            ctx.lineTo(width - 30, height - 50);
+            ctx.stroke();
+            
+            // 绘制网格
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const x = 50 + i * (width - 80) / 10;
+                ctx.beginPath();
+                ctx.moveTo(x, 50);
+                ctx.lineTo(x, height - 50);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= 6; i++) {
+                const y = 50 + i * (height - 100) / 6;
+                ctx.beginPath();
+                ctx.moveTo(50, y);
+                ctx.lineTo(width - 30, y);
+                ctx.stroke();
+            }
+            
+            // 绘制力与加速度的关系
+            const mass = 5; // 质量固定为5kg
+            
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let force = 0; force <= 100; force += 1) {
+                const x = 50 + force * (width - 80) / 100;
+                const acceleration = force / mass;
+                const y = height - 50 - acceleration * (height - 100) / 30;
+                if (force === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // 绘制几个数据点
+            const forces = [20, 40, 60, 80];
+            forces.forEach(force => {
+                const acceleration = force / mass;
+                const x = 50 + force * (width - 80) / 100;
+                const y = height - 50 - acceleration * (height - 100) / 30;
+                
+                ctx.fillStyle = '#2563eb';
+                ctx.beginPath();
+                ctx.arc(x, y, 5, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(x, y, 5, 0, 2 * Math.PI);
+                ctx.stroke();
+            });
+            
+            // 绘制公式
+            ctx.fillStyle = '#000';
+            ctx.font = '14px Arial';
+            ctx.fillText('F = ma', width - 80, 30);
+        }
+        
+        // 能量画布
+        const energyCtx = document.getElementById('energyCanvas').getContext('2d');
+        let energyTime = 0;
+        
+        function drawEnergy() {
+            const canvas = document.getElementById('energyCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = canvas.parentElement.clientHeight;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(50, 50);
+            ctx.lineTo(50, height - 50);
+            ctx.lineTo(width - 30, height - 50);
+            ctx.stroke();
+            
+            // 绘制网格
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const x = 50 + i * (width - 80) / 10;
+                ctx.beginPath();
+                ctx.moveTo(x, 50);
+                ctx.lineTo(x, height - 50);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= 6; i++) {
+                const y = 50 + i * (height - 100) / 6;
+                ctx.beginPath();
+                ctx.moveTo(50, y);
+                ctx.lineTo(width - 30, y);
+                ctx.stroke();
+            }
+            
+            // 更新时间
+            energyTime += 0.05;
+            if (energyTime > 2 * Math.PI) {
+                energyTime = 0;
+            }
+            
+            // 绘制动能曲线
+            if (document.getElementById('showKinetic').checked) {
+                ctx.strokeStyle = '#f97316';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                for (let t = 0; t <= 2 * Math.PI; t += 0.1) {
+                    const x = 50 + (t / (2 * Math.PI)) * (width - 80);
+                    const kineticEnergy = 50 * Math.sin(t + energyTime) * Math.sin(t + energyTime);
+                    const y = height - 50 - kineticEnergy * (height - 100) / 100;
+                    if (t === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+            }
+            
+            // 绘制势能曲线
+            if (document.getElementById('showPotential').checked) {
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                for (let t = 0; t <= 2 * Math.PI; t += 0.1) {
+                    const x = 50 + (t / (2 * Math.PI)) * (width - 80);
+                    const potentialEnergy = 50 + 50 * Math.cos(t + energyTime);
+                    const y = height - 50 - potentialEnergy * (height - 100) / 100;
+                    if (t === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+            }
+            
+            // 绘制总能量曲线
+            if (document.getElementById('showTotal').checked) {
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                for (let t = 0; t <= 2 * Math.PI; t += 0.1) {
+                    const x = 50 + (t / (2 * Math.PI)) * (width - 80);
+                    const y = height - 50 - 50 * (height - 100) / 100;
+                    if (t === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+            
+            // 绘制图例
+            if (document.getElementById('showKinetic').checked) {
+                ctx.fillStyle = '#f97316';
+                ctx.fillRect(30, 20, 15, 10);
+                ctx.fillStyle = '#000';
+                ctx.font = '12px Arial';
+                ctx.fillText('动能', 50, 30);
+            }
+            
+            if (document.getElementById('showPotential').checked) {
+                ctx.fillStyle = '#2563eb';
+                ctx.fillRect(100, 20, 15, 10);
+                ctx.fillStyle = '#000';
+                ctx.font = '12px Arial';
+                ctx.fillText('势能', 120, 30);
+            }
+            
+            if (document.getElementById('showTotal').checked) {
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(170, 20);
+                ctx.lineTo(185, 20);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = '#000';
+                ctx.font = '12px Arial';
+                ctx.fillText('总能量', 190, 30);
+            }
+        }
+        
+        // 电磁学画布
+        const electromagnetismCtx = document.getElementById('electromagnetismCanvas').getContext('2d');
+        
+        function drawElectromagnetism() {
+            const canvas = document.getElementById('electromagnetismCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = canvas.parentElement.clientHeight;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(50, 50);
+            ctx.lineTo(50, height - 50);
+            ctx.lineTo(width - 30, height - 50);
+            ctx.stroke();
+            
+            // 绘制电势曲线
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = 0; x <= 100; x += 1) {
+                const canvasX = 50 + x * (width - 80) / 100;
+                const potential = 100 - 0.5 * x * x;
+                const canvasY = height - 50 - (potential + 150) * (height - 100) / 400;
+                if (x === 0) {
+                    ctx.moveTo(canvasX, canvasY);
+                } else {
+                    ctx.lineTo(canvasX, canvasY);
+                }
+            }
+            ctx.stroke();
+            
+            // 绘制电场强度曲线（电势的负梯度）
+            ctx.strokeStyle = '#f97316';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = 0; x <= 100; x += 1) {
+                const canvasX = 50 + x * (width - 80) / 100;
+                const electricField = x; // 电场强度是电势的负梯度，这里电势是100-0.5x²，梯度是-x，所以电场强度是x
+                const canvasY = height - 50 - (electricField + 50) * (height - 100) / 200;
+                if (x === 0) {
+                    ctx.moveTo(canvasX, canvasY);
+                } else {
+                    ctx.lineTo(canvasX, canvasY);
+                }
+            }
+            ctx.stroke();
+            
+            // 绘制图例
+            ctx.fillStyle = '#2563eb';
+            ctx.fillRect(30, 20, 15, 10);
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('电势', 50, 30);
+            
+            ctx.fillStyle = '#f97316';
+            ctx.fillRect(100, 20, 15, 10);
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('电场强度', 120, 30);
+            
+            // 显示公式
+            ctx.fillStyle = '#000';
+            ctx.font = '14px Arial';
+            ctx.fillText('E = -∇V', width - 80, 30);
+        }
+        
+        // 流体力学画布
+        const fluidDynamicsCtx = document.getElementById('fluidDynamicsCanvas').getContext('2d');
+        
+        function drawFluidDynamics() {
+            const canvas = document.getElementById('fluidDynamicsCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = canvas.parentElement.clientHeight;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制管道
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 3;
+            
+            // 绘制管道上壁
+            ctx.beginPath();
+            ctx.moveTo(50, height / 2 - 80);
+            ctx.bezierCurveTo(width / 4, height / 2 - 120, width * 3 / 4, height / 2 - 40, width - 50, height / 2 - 80);
+            ctx.stroke();
+            
+            // 绘制管道下壁
+            ctx.beginPath();
+            ctx.moveTo(50, height / 2 + 80);
+            ctx.bezierCurveTo(width / 4, height / 2 + 40, width * 3 / 4, height / 2 + 120, width - 50, height / 2 + 80);
+            ctx.stroke();
+            
+            // 绘制流线表示速度
+            const streamlines = 15;
+            for (let i = 0; i < streamlines; i++) {
+                const y = height / 2 - 70 + i * 100 / (streamlines - 1);
+                drawStreamline(ctx, width, height, y);
+            }
+        }
+        
+        function drawStreamline(ctx, width, height, y) {
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            ctx.moveTo(50, y);
+            
+            // 根据管道截面积变化调整流线密度，表示速度变化
+            for (let x = 50; x < width - 50; x++) {
+                // 计算管道在该x位置的高度
+                const top = height / 2 - 80 + 40 * Math.sin(2 * Math.PI * (x - 50) / (width - 100));
+                const bottom = height / 2 + 80 - 40 * Math.sin(2 * Math.PI * (x - 50) / (width - 100));
+                const pipeHeight = bottom - top;
+                
+                // 速度与截面积成反比（连续性方程）
+                const velocity = 100 / pipeHeight;
+                
+                // 根据速度调整流线方向
+                const dy = 0.1 * Math.sin(2 * Math.PI * (x - 50) / (width - 100)) * velocity / 5;
+                
+                ctx.lineTo(x + 1, y + dy);
+                y += dy;
+            }
+            
+            ctx.stroke();
+        }
+        
+        // 初始化并绘制所有图表
+        window.addEventListener('load', function() {
+            drawKinematics();
+            drawDynamics();
+            drawElectromagnetism();
+            drawFluidDynamics();
+            
+            // 能量图表需要动画
+            setInterval(drawEnergy, 50);
+            
+            // 添加窗口大小变化时重绘图表
+            window.addEventListener('resize', function() {
+                drawKinematics();
+                drawDynamics();
+                drawElectromagnetism();
+                drawFluidDynamics();
+            });
+        });
+    </script>
+</body>
+</html>

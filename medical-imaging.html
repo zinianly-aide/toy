@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微积分在医学成像中的应用 | 微积分直观理解</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Chart.js用于数据可视化 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    
+    <!-- 配置Tailwind自定义颜色和字体 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#10b981',
+                        accent: '#f97316',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        math: ['STIX Two Math', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .canvas-container {
+                @apply relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg;
+            }
+            .section-fade {
+                @apply opacity-0 translate-y-8 transition-all duration-700;
+            }
+            .section-visible {
+                @apply opacity-100 translate-y-0;
+            }
+        }
+    </style>
+    
+    <style>
+        /* 基础样式 */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            background-color: #f8fafc;
+        }
+        
+        /* 数学符号显示优化 */
+        .math-expression {
+            font-family: 'STIX Two Math', serif;
+            font-size: 1.1em;
+        }
+        
+        /* Canvas容器样式 */
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 滚动条样式优化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        
+        /* 医学图像特殊样式 */
+        .medical-image-slice {
+            transition: transform 0.3s ease;
+        }
+        
+        .medical-image-slice:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+
+<body class="font-sans text-dark">
+    <!-- 导航栏 -->
+    <header id="navbar" class="fixed w-full z-50 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-calculator text-primary text-2xl"></i>
+                <h1 class="text-xl md:text-2xl font-bold text-primary">微积分直观理解</h1>
+            </div>
+            
+            <!-- 桌面导航 -->
+            <nav class="hidden md:flex space-x-8">
+                <a href="calculus-tutorial.html#intro" class="text-dark/80 hover:text-primary transition-colors">简介</a>
+                <a href="calculus-tutorial.html#derivative" class="text-dark/80 hover:text-primary transition-colors">导数</a>
+                <a href="calculus-tutorial.html#integral" class="text-dark/80 hover:text-primary transition-colors">积分</a>
+                <a href="calculus-tutorial.html#theorem" class="text-dark/80 hover:text-primary transition-colors">微积分基本定理</a>
+                <a href="calculus-tutorial.html#applications" class="text-primary font-medium">应用</a>
+            </nav>
+            
+            <!-- 移动端菜单按钮 -->
+            <button id="menu-toggle" class="md:hidden text-dark text-xl">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+        
+        <!-- 移动端导航菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="calculus-tutorial.html#intro" class="py-2 text-dark/80 hover:text-primary transition-colors">简介</a>
+                <a href="calculus-tutorial.html#derivative" class="py-2 text-dark/80 hover:text-primary transition-colors">导数</a>
+                <a href="calculus-tutorial.html#integral" class="py-2 text-dark/80 hover:text-primary transition-colors">积分</a>
+                <a href="calculus-tutorial.html#theorem" class="py-2 text-dark/80 hover:text-primary transition-colors">微积分基本定理</a>
+                <a href="calculus-tutorial.html#applications" class="py-2 text-primary font-medium">应用</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section class="pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-br from-primary/5 to-accent/5">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="flex justify-center mb-6">
+                    <i class="fa fa-heartbeat text-6xl text-primary"></i>
+                </div>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-dark text-shadow">
+                    微积分在<span class="text-primary">医学成像</span>中的应用
+                </h1>
+                <p class="text-lg md:text-xl text-dark/70 mb-10">
+                    探索微积分如何推动现代医学成像技术的发展，从X射线到MRI和CT扫描
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="#radon-transform" class="px-8 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-1">
+                        开始探索 <i class="fa fa-arrow-right ml-2"></i>
+                    </a>
+                    <a href="calculus-tutorial.html#applications" class="px-8 py-3 bg-white text-primary border border-primary rounded-lg font-medium hover:bg-primary/5 transition-all">
+                        返回应用列表
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-4 py-12">
+        <!-- 拉东变换部分 -->
+        <section id="radon-transform" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-primary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">CT扫描的数学基础：拉东变换</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-10">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">从投影到图像重建</h3>
+                    <p class="mb-4">
+                        CT（计算机断层扫描）的核心数学原理是拉东变换，它将三维物体的内部结构通过多个角度的二维投影来重建。拉东变换是积分变换的一种，在医学成像中有着至关重要的作用。
+                    </p>
+                    <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
+                        <p class="font-medium mb-2 text-center">拉东变换的数学表示：</p>
+                        <div class="text-center">
+                            <span class="math-expression text-xl">Rf(ρ, θ) = ∫∫_{(x,y) ∈ L(ρ,θ)} f(x,y) ds</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <p class="font-medium text-sm mb-1">各符号含义：</p>
+                                <ul class="text-sm space-y-1">
+                                    <li>f(x,y)：二维物体的密度函数</li>
+                                    <li>L(ρ,θ)：由参数ρ和θ定义的直线</li>
+                                    <li>Rf(ρ,θ)：拉东变换的结果（投影数据）</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <p class="font-medium text-sm mb-1">实际意义：</p>
+                                <ul class="text-sm space-y-1">
+                                    <li>ρ：直线到原点的距离</li>
+                                    <li>θ：直线的法线与x轴的夹角</li>
+                                    <li>ds：沿着直线的线积分元素</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mb-4">
+                        CT扫描过程中，X射线源和检测器围绕患者旋转，收集不同角度的投影数据。计算机通过逆拉东变换（也称为滤波反投影算法）将这些投影数据重建为断层图像。
+                    </p>
+                </div>
+                
+                <div class="canvas-container h-96">
+                    <canvas id="radonTransformCanvas"></canvas>
+                    <div class="absolute top-3 right-3 flex space-x-2">
+                        <button id="rotateSource" class="p-2 bg-primary/10 hover:bg-primary/20 rounded-full transition-colors">
+                            <i class="fa fa-refresh text-primary"></i>
+                        </button>
+                    </div>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        拉东变换模拟：从投影到图像重建
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 傅里叶变换部分 -->
+        <section id="fourier-transform" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-secondary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">频域分析与傅里叶变换</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-10">
+                <div class="canvas-container h-96">
+                    <canvas id="fourierTransformCanvas"></canvas>
+                    <div class="absolute top-3 right-3 flex space-x-2">
+                        <button id="changeImage" class="p-2 bg-secondary/10 hover:bg-secondary/20 rounded-full transition-colors">
+                            <i class="fa fa-random text-secondary"></i>
+                        </button>
+                        <button id="toggleFilter" class="p-2 bg-secondary/10 hover:bg-secondary/20 rounded-full transition-colors">
+                            <i class="fa fa-filter text-secondary"></i>
+                        </button>
+                    </div>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        图像的傅里叶变换与频域滤波
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">从空间域到频率域</h3>
+                    <p class="mb-4">
+                        傅里叶变换是医学图像处理中的另一个重要数学工具，它将图像从空间域转换到频率域，使得许多在空间域难以处理的问题在频率域变得简单。
+                    </p>
+                    <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
+                        <p class="font-medium mb-2 text-center">二维离散傅里叶变换：</p>
+                        <div class="text-center">
+                            <span class="math-expression text-lg">F(u,v) = Σ_{x=0}^{M-1} Σ_{y=0}^{N-1} f(x,y) e^{-j2π(ux/M + vy/N)}</span>
+                        </div>
+                        <p class="text-sm text-dark/60 mt-2 text-center">
+                            其中f(x,y)是原始图像，F(u,v)是变换后的频域表示
+                        </p>
+                    </div>
+                    <p class="mb-4">
+                        在医学成像中，傅里叶变换的应用包括：
+                    </p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-secondary mt-1 mr-2"></i>
+                            <span>图像降噪和增强</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-secondary mt-1 mr-2"></i>
+                            <span>图像压缩</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-secondary mt-1 mr-2"></i>
+                            <span>MRI图像重建</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-secondary mt-1 mr-2"></i>
+                            <span>滤波反投影算法的理论基础</span>
+                        </li>
+                    </ul>
+                    <p class="mb-4">
+                        特别值得注意的是，在CT图像重建中，傅里叶切片定理建立了拉东变换和傅里叶变换之间的重要关系，为滤波反投影算法提供了理论基础。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- MRI成像部分 -->
+        <section id="mri-imaging" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-accent rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">核磁共振成像的微积分原理</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-10">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">原子核的宏观磁化向量</h3>
+                    <p class="mb-4">
+                        核磁共振成像(MRI)基于原子核的自旋特性，特别是氢原子核的自旋。MRI的数学模型涉及微积分中的向量场、微分方程和傅里叶变换等概念。
+                    </p>
+                    <div class="bg-white p-4 rounded-lg shadow-sm mb-6">
+                        <p class="font-medium mb-1">布洛赫方程（简化版）：</p>
+                        <span class="math-expression">dM/dt = γ(M × B) - (Mₓi + Mᵧj)/T₂ - (Mz - M₀)k/T₁</span>
+                        <p class="text-sm text-dark/60 mt-1">描述磁化向量M在磁场B中的演化</p>
+                    </div>
+                    <p class="mb-4">
+                        MRI的信号产生和图像重建过程涉及以下步骤：
+                    </p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-accent mt-1 mr-2"></i>
+                            <span>在静磁场中对齐原子核的自旋</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-accent mt-1 mr-2"></i>
+                            <span>施加射频脉冲使磁化向量偏离平衡位置</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-accent mt-1 mr-2"></i>
+                            <span>施加梯度磁场进行空间编码</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-accent mt-1 mr-2"></i>
+                            <span>接收并分析原子核弛豫过程中产生的信号</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-accent mt-1 mr-2"></i>
+                            <span>通过傅里叶变换重建图像</span>
+                        </li>
+                    </ul>
+                    <p class="mb-4">
+                        MRI相比于CT的优势在于它不使用电离辐射，并且可以提供更好的软组织对比度。
+                    </p>
+                </div>
+                
+                <div class="canvas-container h-96">
+                    <canvas id="mriImagingCanvas"></canvas>
+                    <div class="absolute top-3 right-3 flex space-x-2">
+                        <button id="applyRFPulse" class="p-2 bg-accent/10 hover:bg-accent/20 rounded-full transition-colors">
+                            <i class="fa fa-bolt text-accent"></i>
+                        </button>
+                        <button id="changeContrast" class="p-2 bg-accent/10 hover:bg-accent/20 rounded-full transition-colors">
+                            <i class="fa fa-paint-brush text-accent"></i>
+                        </button>
+                    </div>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        MRI信号产生与弛豫过程模拟
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 图像处理部分 -->
+        <section id="image-processing" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-primary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">医学图像处理中的微积分方法</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-10">
+                <div class="canvas-container h-96">
+                    <canvas id="imageProcessingCanvas"></canvas>
+                    <div class="absolute top-3 right-3 flex flex-col space-y-2">
+                        <button id="applySmoothing" class="p-2 bg-primary/10 hover:bg-primary/20 rounded-full transition-colors">
+                            <i class="fa fa-smile-o text-primary"></i>
+                        </button>
+                        <button id="applySharpening" class="p-2 bg-primary/10 hover:bg-primary/20 rounded-full transition-colors">
+                            <i class="fa fa-magic text-primary"></i>
+                        </button>
+                        <button id="applyEdgeDetection" class="p-2 bg-primary/10 hover:bg-primary/20 rounded-full transition-colors">
+                            <i class="fa fa-cut text-primary"></i>
+                        </button>
+                    </div>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        医学图像滤波与边缘检测
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">图像增强与特征提取</h3>
+                    <p class="mb-4">
+                        医学图像通常需要进行各种处理以提高图像质量、增强诊断特征并帮助医生做出更准确的判断。这些处理大多基于微积分中的微分和积分概念。
+                    </p>
+                    <div class="space-y-4 mb-6">
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <p class="font-medium mb-1">图像梯度（边缘检测）：</p>
+                            <span class="math-expression">∇f = (∂f/∂x, ∂f/∂y)</span>
+                            <p class="text-sm text-dark/60 mt-1">梯度的幅值表示边缘强度，方向表示边缘方向</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <p class="font-medium mb-1">高斯滤波（图像平滑）：</p>
+                            <span class="math-expression">G_σ(x,y) = (1/(2πσ²)) e^{-(x²+y²)/(2σ²)}</span>
+                            <p class="text-sm text-dark/60 mt-1">σ控制平滑程度，σ越大，平滑效果越强</p>
+                        </div>
+                    </div>
+                    <p class="mb-4">
+                        常见的医学图像处理技术包括：
+                    </p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-primary mt-1 mr-2"></i>
+                            <span>图像滤波（降噪、平滑、锐化）</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-primary mt-1 mr-2"></i>
+                            <span>边缘检测与轮廓提取</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-primary mt-1 mr-2"></i>
+                            <span>图像分割（器官和病变识别）</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-primary mt-1 mr-2"></i>
+                            <span>图像配准（多模态图像融合）</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-primary mt-1 mr-2"></i>
+                            <span>图像量化与特征提取</span>
+                        </li>
+                    </ul>
+                    <p class="mb-4">
+                        这些技术在医学诊断、手术规划和治疗评估中发挥着重要作用。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 三维重建部分 -->
+        <section id="3d-reconstruction" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-secondary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">三维医学图像重建</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-10">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">从二维切片到三维模型</h3>
+                    <p class="mb-4">
+                        三维医学图像重建是将多个二维断层图像（如CT或MRI切片）组合成三维模型的过程，这在医学诊断、手术规划和教学中有着广泛的应用。
+                    </p>
+                    <div class="bg-white p-4 rounded-lg shadow-sm mb-6">
+                        <p class="font-medium mb-1">三维插值（体数据重建）：</p>
+                        <span class="math-expression">f(x,y,z) = Σ_{i,j,k} f(i,j,k) * w(x-i) * w(y-j) * w(z-k)</span>
+                        <p class="text-sm text-dark/60 mt-1">w是插值核函数，如线性、三次或样条插值</p>
+                    </div>
+                    <p class="mb-4">
+                        三维医学图像重建的主要步骤包括：
+                    </p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-secondary mt-1 mr-2"></i>
+                            <span>图像预处理（降噪、增强）</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-secondary mt-1 mr-2"></i>
+                            <span>图像分割（识别感兴趣的解剖结构）</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-secondary mt-1 mr-2"></i>
+                            <span>三维插值（填充断层间的间隙）</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-secondary mt-1 mr-2"></i>
+                            <span>表面重建或体绘制</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-secondary mt-1 mr-2"></i>
+                            <span>可视化和交互</span>
+                        </li>
+                    </ul>
+                    <p class="mb-4">
+                        现代医学影像系统通常配备强大的三维重建软件，帮助医生从多个角度观察解剖结构和病变，提高诊断准确性。
+                    </p>
+                </div>
+                
+                <div class="canvas-container h-96">
+                    <canvas id="3dReconstructionCanvas"></canvas>
+                    <div class="absolute top-3 right-3 flex space-x-2">
+                        <button id="rotate3DModel" class="p-2 bg-secondary/10 hover:bg-secondary/20 rounded-full transition-colors">
+                            <i class="fa fa-refresh text-secondary"></i>
+                        </button>
+                        <button id="changeView" class="p-2 bg-secondary/10 hover:bg-secondary/20 rounded-full transition-colors">
+                            <i class="fa fa-exchange text-secondary"></i>
+                        </button>
+                    </div>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        三维医学图像重建与可视化
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 实际医学成像案例 -->
+        <section id="medical-imaging-examples" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-accent rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">实际医学成像案例分析</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- 案例1：CT扫描 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg group">
+                    <div class="h-48 overflow-hidden">
+                        <div class="medical-image-slice h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                            <i class="fa fa-braille text-6xl text-primary opacity-50 group-hover:opacity-70 transition-opacity"></i>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-3">CT扫描技术</h3>
+                        <p class="text-dark/70 mb-4">
+                            CT扫描利用X射线和计算机处理技术生成人体内部的断层图像，在头部创伤、肿瘤检测和骨骼疾病诊断中广泛应用。
+                        </p>
+                        <div class="bg-primary/5 p-3 rounded-lg">
+                            <p class="font-medium text-sm mb-1">关键微积分应用：</p>
+                            <ul class="list-disc list-inside text-sm space-y-1">
+                                <li>拉东变换与逆变换</li>
+                                <li>滤波反投影算法</li>
+                                <li>图像降噪与增强</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 案例2：MRI成像 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg group">
+                    <div class="h-48 overflow-hidden">
+                        <div class="medical-image-slice h-full bg-gradient-to-br from-secondary/20 to-secondary/5 flex items-center justify-center">
+                            <i class="fa fa-magnet text-6xl text-secondary opacity-50 group-hover:opacity-70 transition-opacity"></i>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-3">MRI成像技术</h3>
+                        <p class="text-dark/70 mb-4">
+                            MRI利用强磁场和射频脉冲生成高对比度的软组织图像，对中枢神经系统、关节和内脏器官的检查具有独特优势。
+                        </p>
+                        <div class="bg-secondary/5 p-3 rounded-lg">
+                            <p class="font-medium text-sm mb-1">关键微积分应用：</p>
+                            <ul class="list-disc list-inside text-sm space-y-1">
+                                <li>布洛赫方程求解</li>
+                                <li>梯度磁场空间编码</li>
+                                <li>傅里叶变换图像重建</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 案例3：超声成像 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg group">
+                    <div class="h-48 overflow-hidden">
+                        <div class="medical-image-slice h-full bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center">
+                            <i class="fa fa-area-chart text-6xl text-accent opacity-50 group-hover:opacity-70 transition-opacity"></i>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-3">超声成像技术</h3>
+                        <p class="text-dark/70 mb-4">
+                            超声成像通过高频声波的反射来生成实时图像，广泛应用于产科、心脏和腹部检查，具有无创、无辐射的优势。
+                        </p>
+                        <div class="bg-accent/5 p-3 rounded-lg">
+                            <p class="font-medium text-sm mb-1">关键微积分应用：</p>
+                            <ul class="list-disc list-inside text-sm space-y-1">
+                                <li>声波传播方程</li>
+                                <li>信号处理与滤波</li>
+                                <li>多普勒效应分析</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 医学成像的未来 -->
+        <section id="future-trends" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-primary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">医学成像的未来发展趋势</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-10">
+                <div class="canvas-container h-96">
+                    <canvas id="futureTrendsCanvas"></canvas>
+                    <div class="absolute top-3 left-3 flex flex-col space-y-2">
+                        <div class="bg-white px-3 py-1 rounded-lg shadow-sm text-sm">
+                            <span class="font-medium">技术趋势：</span>
+                            <select id="trendType" class="border-none bg-transparent text-primary focus:ring-0">
+                                <option value="resolution" selected>空间分辨率</option>
+                                <option value="speed">成像速度</option>
+                                <option value="contrast">对比度</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        医学成像技术发展趋势预测
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">从经典成像到智能医学</h3>
+                    <p class="mb-4">
+                        随着微积分、计算机科学和医学的不断发展，医学成像技术正在经历一场革命。以下是几个重要的发展趋势：
+                    </p>
+                    <div class="space-y-4 mb-6">
+                        <div class="flex items-start bg-white p-4 rounded-lg shadow-sm">
+                            <div class="bg-primary/10 p-2 rounded-full mr-4">
+                                <i class="fa fa-brain text-primary"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium mb-1">人工智能辅助诊断</h4>
+                                <p class="text-sm text-dark/70">
+                                    深度学习和机器学习算法正在被用于医学图像的自动分析和诊断，能够帮助医生识别早期病变和提高诊断准确性。
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start bg-white p-4 rounded-lg shadow-sm">
+                            <div class="bg-secondary/10 p-2 rounded-full mr-4">
+                                <i class="fa fa-object-group text-secondary"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium mb-1">多模态融合成像</h4>
+                                <p class="text-sm text-dark/70">
+                                    结合CT、MRI、PET等多种成像模态的信息，提供更全面的解剖和功能信息，为精准医疗提供支持。
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start bg-white p-4 rounded-lg shadow-sm">
+                            <div class="bg-accent/10 p-2 rounded-full mr-4">
+                                <i class="fa fa-bolt text-accent"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium mb-1">功能和分子成像</h4>
+                                <p class="text-sm text-dark/70">
+                                    从单纯的解剖结构成像向功能和分子水平成像发展，能够在更早期阶段检测疾病和评估治疗效果。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mb-4">
+                        这些发展趋势的背后，是微积分、信号处理、计算机科学等多学科的交叉融合，为医学诊断和治疗带来了前所未有的可能性。
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="max-w-5xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                    <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                        <i class="fa fa-calculator text-primary text-2xl"></i>
+                        <h2 class="text-xl font-bold">微积分直观理解</h2>
+                    </div>
+                    <div class="flex space-x-6">
+                        <a href="calculus-tutorial.html#intro" class="text-white/70 hover:text-primary transition-colors">简介</a>
+                        <a href="calculus-tutorial.html#derivative" class="text-white/70 hover:text-primary transition-colors">导数</a>
+                        <a href="calculus-tutorial.html#integral" class="text-white/70 hover:text-primary transition-colors">积分</a>
+                        <a href="calculus-tutorial.html#applications" class="text-white/70 hover:text-primary transition-colors">应用</a>
+                    </div>
+                </div>
+                
+                <div class="border-t border-white/10 pt-8 text-center text-white/60 text-sm">
+                    <p>© 2023 微积分直观理解. 本网站旨在通过交互式可视化帮助理解微积分概念。</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript代码 -->
+    <script>
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('py-2', 'shadow');
+                navbar.classList.remove('py-3');
+            } else {
+                navbar.classList.add('py-3');
+                navbar.classList.remove('py-2', 'shadow');
+            }
+        });
+        
+        // 移动端菜单切换
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // 滚动动画
+        const sections = document.querySelectorAll('.section-fade');
+        
+        function checkVisibility() {
+            sections.forEach(section => {
+                const sectionTop = section.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                
+                if (sectionTop < windowHeight * 0.85) {
+                    section.classList.add('section-visible');
+                }
+            });
+        }
+        
+        // 初始检查
+        window.addEventListener('load', checkVisibility);
+        // 滚动时检查
+        window.addEventListener('scroll', checkVisibility);
+        
+        // 拉东变换画布
+        const radonTransformCtx = document.getElementById('radonTransformCanvas').getContext('2d');
+        let sourceAngle = 0;
+        let phantomType = 0;
+        let projections = [];
+        
+        function drawRadonTransform() {
+            const canvas = document.getElementById('radonTransformCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = canvas.parentElement.clientHeight;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制左侧：物体和投影
+            const leftWidth = width * 0.5;
+            
+            // 绘制物体（幻影）
+            const centerX = leftWidth * 0.5;
+            const centerY = height * 0.5;
+            const objectSize = Math.min(leftWidth, height) * 0.3;
+            
+            // 创建幻影（简单的几何形状）
+            ctx.fillStyle = '#2563eb';
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            
+            if (phantomType === 0) {
+                // 圆形幻影
+                ctx.beginPath();
+                ctx.arc(0, 0, objectSize * 0.5, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+            } else if (phantomType === 1) {
+                // 椭圆幻影
+                ctx.beginPath();
+                ctx.ellipse(0, 0, objectSize * 0.6, objectSize * 0.3, 0, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+            } else if (phantomType === 2) {
+                // 方形幻影
+                ctx.beginPath();
+                ctx.rect(-objectSize * 0.5, -objectSize * 0.5, objectSize, objectSize);
+                ctx.fill();
+                ctx.stroke();
+            }
+            
+            ctx.restore();
+            
+            // 绘制X射线源和检测器
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(sourceAngle);
+            
+            // X射线源
+            const sourceDistance = objectSize * 1.5;
+            ctx.fillStyle = '#f43f5e';
+            ctx.beginPath();
+            ctx.arc(0, -sourceDistance, 8, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // X射线束
+            ctx.strokeStyle = '#f43f5e';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            
+            const beamAngle = Math.PI / 6;
+            ctx.beginPath();
+            ctx.moveTo(0, -sourceDistance);
+            ctx.lineTo(-objectSize * Math.sin(beamAngle), objectSize * Math.cos(beamAngle));
+            ctx.moveTo(0, -sourceDistance);
+            ctx.lineTo(objectSize * Math.sin(beamAngle), objectSize * Math.cos(beamAngle));
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            ctx.restore();
+            
+            // 绘制右侧：投影数据和重建图像
+            const rightWidth = width * 0.5;
+            const rightOffset = leftWidth;
+            
+            // 绘制投影数据
+            const projectionHeight = height * 0.4;
+            const projectionY = height * 0.1;
+            
+            // 添加新的投影数据
+            if (projections.length < 180) {
+                // 模拟投影数据
+                const projectionData = [];
+                const numDetectors = 60;
+                for (let i = 0; i < numDetectors; i++) {
+                    // 简单模拟：中心区域的投影值较大
+                    const distanceFromCenter = Math.abs(i - numDetectors / 2) / (numDetectors / 2);
+                    const value = Math.exp(-distanceFromCenter * 2);
+                    projectionData.push(value);
+                }
+                projections.push(projectionData);
+            }
+            
+            // 绘制所有投影数据（正弦图）
+            ctx.fillStyle = '#e2e8f0';
+            ctx.fillRect(rightOffset, projectionY, rightWidth, projectionHeight);
+            
+            const detectorWidth = rightWidth / projections[0].length;
+            const projectionAngleStep = projectionHeight / projections.length;
+            
+            for (let angle = 0; angle < projections.length; angle++) {
+                const projectionData = projections[angle];
+                for (let detector = 0; detector < projectionData.length; detector++) {
+                    const intensity = projectionData[detector];
+                    ctx.fillStyle = `rgb(${255 * (1 - intensity)}, ${255 * (1 - intensity)}, ${255})`;
+                    ctx.fillRect(
+                        rightOffset + detector * detectorWidth,
+                        projectionY + angle * projectionAngleStep,
+                        detectorWidth,
+                        projectionAngleStep
+                    );
+                }
+            }
+            
+            // 绘制重建图像
+            const reconstructionSize = Math.min(rightWidth, height * 0.4);
+            const reconstructionX = rightOffset + (rightWidth - reconstructionSize) / 2;
+            const reconstructionY = height * 0.6;
+            
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(reconstructionX, reconstructionY, reconstructionSize, reconstructionSize);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(reconstructionX, reconstructionY, reconstructionSize, reconstructionSize);
+            
+            // 简单的滤波反投影重建模拟
+            if (projections.length > 0) {
+                // 重建图像的像素数
+                const numPixels = 40;
+                const pixelSize = reconstructionSize / numPixels;
+                
+                // 初始化重建图像
+                const reconstructedImage = [];
+                for (let i = 0; i < numPixels; i++) {
+                    reconstructedImage[i] = [];
+                    for (let j = 0; j < numPixels; j++) {
+                        reconstructedImage[i][j] = 0;
+                    }
+                }
+                
+                // 反投影
+                for (let angleIndex = 0; angleIndex < projections.length; angleIndex++) {
+                    const angle = (angleIndex / projections.length) * Math.PI;
+                    const projectionData = projections[angleIndex];
+                    
+                    for (let detectorIndex = 0; detectorIndex < projectionData.length; detectorIndex++) {
+                        const value = projectionData[detectorIndex];
+                        
+                        // 对每个像素，检查它是否在当前投影角度的射线上
+                        for (let i = 0; i < numPixels; i++) {
+                            for (let j = 0; j < numPixels; j++) {
+                                // 将像素坐标转换为物理坐标
+                                const x = (j - numPixels / 2) * pixelSize;
+                                const y = (i - numPixels / 2) * pixelSize;
+                                
+                                // 计算该像素在当前角度下的投影位置
+                                const projectionPosition = x * Math.cos(angle) + y * Math.sin(angle);
+                                const normalizedProjectionPosition = (projectionPosition / (reconstructionSize / 2) + 1) / 2;
+                                const nearestDetector = Math.round(normalizedProjectionPosition * (projectionData.length - 1));
+                                
+                                // 如果像素在当前检测器的射线附近，累加投影值
+                                if (Math.abs(nearestDetector - detectorIndex) < 3) {
+                                    reconstructedImage[i][j] += value;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // 绘制重建图像
+                let maxValue = 0;
+                for (let i = 0; i < numPixels; i++) {
+                    for (let j = 0; j < numPixels; j++) {
+                        if (reconstructedImage[i][j] > maxValue) {
+                            maxValue = reconstructedImage[i][j];
+                        }
+                    }
+                }
+                
+                for (let i = 0; i < numPixels; i++) {
+                    for (let j = 0; j < numPixels; j++) {
+                        const normalizedValue = reconstructedImage[i][j] / maxValue;
+                        ctx.fillStyle = `rgb(${255 * (1 - normalizedValue)}, ${255 * (1 - normalizedValue)}, ${255})`;
+                        ctx.fillRect(
+                            reconstructionX + j * pixelSize,
+                            reconstructionY + i * pixelSize,
+                            pixelSize,
+                            pixelSize
+                        );
+                    }
+                }
+            }
+            
+            // 显示说明文字
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('物体和投影', leftWidth / 2 - 30, height - 10);
+            ctx.fillText('正弦图和重建图像', rightOffset + rightWidth / 2 - 60, height - 10);
+            
+            // 旋转X射线源
+            sourceAngle += 0.02;
+            if (sourceAngle >= 2 * Math.PI) {
+                sourceAngle = 0;
+                // 每旋转一周，改变幻影类型
+                phantomType = (phantomType + 1) % 3;
+                projections = [];
+            }
+        }
+        
+        // 旋转源按钮
+        document.getElementById('rotateSource').addEventListener('click', function() {
+            sourceAngle += Math.PI / 4;
+            if (sourceAngle >= 2 * Math.PI) {
+                sourceAngle -= 2 * Math.PI;
+            }
+            drawRadonTransform();
+        });
+        
+        // 傅里叶变换画布
+        const fourierTransformCtx = document.getElementById('fourierTransformCanvas').getContext('2d');
+        let currentImage = 0;
+        let filterApplied = false;
+        
+        function drawFourierTransform() {
+            const canvas = document.getElementById('fourierTransformCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = canvas.parentElement.clientHeight;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制左侧：原始图像
+            const leftWidth = width * 0.5;
+            const imageSize = Math.min(leftWidth, height * 0.8);
+            const imageX = (leftWidth - imageSize) / 2;
+            const imageY = (height - imageSize) / 2;
+            
+            // 绘制简单的测试图像
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(imageX, imageY, imageSize, imageSize);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(imageX, imageY, imageSize, imageSize);
+            
+            // 绘制不同的测试图像
+            ctx.fillStyle = '#000';
+            if (currentImage === 0) {
+                // 圆形图像
+                ctx.beginPath();
+                ctx.arc(imageX + imageSize / 2, imageY + imageSize / 2, imageSize / 4, 0, 2 * Math.PI);
+                ctx.fill();
+            } else if (currentImage === 1) {
+                // 方形图像
+                ctx.fillRect(imageX + imageSize / 4, imageY + imageSize / 4, imageSize / 2, imageSize / 2);
+            } else if (currentImage === 2) {
+                // 条纹图像
+                const numStripes = 10;
+                const stripeWidth = imageSize / numStripes;
+                for (let i = 0; i < numStripes; i += 2) {
+                    ctx.fillRect(imageX + i * stripeWidth, imageY, stripeWidth, imageSize);
+                }
+            }
+            
+            // 绘制右侧：傅里叶变换结果
+            const rightWidth = width * 0.5;
+            const rightOffset = leftWidth;
+            const spectrumSize = Math.min(rightWidth, height * 0.8);
+            const spectrumX = rightOffset + (rightWidth - spectrumSize) / 2;
+            const spectrumY = (height - spectrumSize) / 2;
+            
+            // 绘制频谱（简化版，实际应用中需要计算真正的傅里叶变换）
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(spectrumX, spectrumY, spectrumSize, spectrumSize);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(spectrumX, spectrumY, spectrumSize, spectrumSize);
+            
+            // 中心十字线
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(spectrumX, spectrumY + spectrumSize / 2);
+            ctx.lineTo(spectrumX + spectrumSize, spectrumY + spectrumSize / 2);
+            ctx.moveTo(spectrumX + spectrumSize / 2, spectrumY);
+            ctx.lineTo(spectrumX + spectrumSize / 2, spectrumY + spectrumSize);
+            ctx.stroke();
+            
+            // 模拟频谱
+            ctx.fillStyle = '#000';
+            const centerX = spectrumX + spectrumSize / 2;
+            const centerY = spectrumY + spectrumSize / 2;
+            
+            if (currentImage === 0) {
+                // 圆形图像的频谱（同心圆）
+                for (let radius = 5; radius < spectrumSize / 2; radius += 10) {
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                    ctx.stroke();
+                }
+            } else if (currentImage === 1) {
+                // 方形图像的频谱（sinc函数模式）
+                for (let i = 0; i < 10; i++) {
+                    const amplitude = (spectrumSize / 2) * Math.exp(-i * 0.5);
+                    const spacing = (spectrumSize / 2) / (i + 1);
+                    
+                    // 水平条纹
+                    ctx.beginPath();
+                    ctx.moveTo(centerX - amplitude, centerY + spacing);
+                    ctx.lineTo(centerX + amplitude, centerY + spacing);
+                    ctx.moveTo(centerX - amplitude, centerY - spacing);
+                    ctx.lineTo(centerX + amplitude, centerY - spacing);
+                    ctx.stroke();
+                    
+                    // 垂直条纹
+                    ctx.beginPath();
+                    ctx.moveTo(centerX + spacing, centerY - amplitude);
+                    ctx.lineTo(centerX + spacing, centerY + amplitude);
+                    ctx.moveTo(centerX - spacing, centerY - amplitude);
+                    ctx.lineTo(centerX - spacing, centerY + amplitude);
+                    ctx.stroke();
+                }
+            } else if (currentImage === 2) {
+                // 条纹图像的频谱（垂直线）
+                const frequency = 10; // 条纹频率
+                const spacing = spectrumSize / (frequency * 2);
+                
+                for (let i = -frequency; i <= frequency; i++) {
+                    if (i !== 0) {
+                        const x = centerX + i * spacing;
+                        if (x >= spectrumX && x <= spectrumX + spectrumSize) {
+                            ctx.beginPath();
+                            ctx.moveTo(x, spectrumY);
+                            ctx.lineTo(x, spectrumY + spectrumSize);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+            
+            // 如果应用了滤波器，绘制滤波后的频谱
+            if (filterApplied) {
+                // 模拟低通滤波器（模糊效果）
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, spectrumSize / 4, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // 模拟高通滤波器（锐化效果）
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                ctx.fillRect(spectrumX, spectrumY, spectrumSize, spectrumSize);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, spectrumSize / 8, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+            
+            // 显示说明文字
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('原始图像', leftWidth / 2 - 20, height - 10);
+            ctx.fillText('傅里叶频谱', rightOffset + rightWidth / 2 - 30, height - 10);
+        }
+        
+        // 切换图像按钮
+        document.getElementById('changeImage').addEventListener('click', function() {
+            currentImage = (currentImage + 1) % 3;
+            drawFourierTransform();
+        });
+        
+        // 切换滤波器按钮
+        document.getElementById('toggleFilter').addEventListener('click', function() {
+            filterApplied = !filterApplied;
+            drawFourierTransform();
+        });
+        
+        // MRI成像画布
+        const mriImagingCtx = document.getElementById('mriImagingCanvas').getContext('2d');
+        let rfPulseApplied = false;
+        let contrastType = 0;
+        let relaxationTime = 0;
+        
+        function drawMriImaging() {
+            const canvas = document.getElementById('mriImagingCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = canvas.parentElement.clientHeight;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制左侧：磁场和原子核
+            const leftWidth = width * 0.5;
+            
+            // 绘制主磁场
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            for (let y = 40; y < height - 40; y += 20) {
+                ctx.beginPath();
+                ctx.moveTo(20, y);
+                ctx.lineTo(leftWidth - 20, y);
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+            
+            // 绘制原子核（自旋质子）
+            const numProtons = 30;
+            const protonSize = 4;
+            
+            for (let i = 0; i < numProtons; i++) {
+                // 随机位置
+                const x = 40 + Math.random() * (leftWidth - 80);
+                const y = 40 + Math.random() * (height - 80);
+                
+                // 根据RF脉冲是否应用和弛豫时间，决定质子的朝向
+                let angle = 0;
+                if (rfPulseApplied) {
+                    // 应用RF脉冲后，质子偏离主磁场方向
+                    const maxAngle = Math.PI / 2 * Math.exp(-relaxationTime / 100);
+                    angle = maxAngle * (0.5 - Math.random());
+                }
+                
+                // 绘制质子
+                ctx.fillStyle = '#ec4899';
+                ctx.beginPath();
+                ctx.arc(x, y, protonSize, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // 绘制质子自旋方向
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + protonSize * 2 * Math.sin(angle), y - protonSize * 2 * Math.cos(angle));
+                ctx.stroke();
+            }
+            
+            // 如果应用了RF脉冲，绘制脉冲波形
+            if (rfPulseApplied && relaxationTime < 30) {
+                ctx.strokeStyle = '#f97316';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                const pulseY = height / 2;
+                for (let x = 20; x < leftWidth - 20; x++) {
+                    const t = (x - 20) / (leftWidth - 40);
+                    const amplitude = 50 * Math.exp(-(t - 0.5) * (t - 0.5) / 0.05) * Math.cos(20 * Math.PI * t);
+                    const y = pulseY + amplitude;
+                    if (x === 20) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+            }
+            
+            // 绘制右侧：MRI信号和图像
+            const rightWidth = width * 0.5;
+            const rightOffset = leftWidth;
+            
+            // 绘制MRI信号
+            const signalHeight = height * 0.3;
+            const signalY = height * 0.1;
+            
+            ctx.fillStyle = '#e2e8f0';
+            ctx.fillRect(rightOffset, signalY, rightWidth, signalHeight);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(rightOffset, signalY, rightWidth, signalHeight);
+            
+            // 绘制信号衰减曲线（自由感应衰减）
+            if (rfPulseApplied) {
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                const signalCenterY = signalY + signalHeight / 2;
+                for (let x = rightOffset + 20; x < rightOffset + rightWidth - 20; x++) {
+                    const t = (x - rightOffset - 20) / (rightWidth - 40) * 2;
+                    // T1和T2弛豫时间影响的信号衰减
+                    const amplitude = 50 * Math.exp(-t / 2) * Math.cos(10 * Math.PI * t);
+                    const y = signalCenterY + amplitude;
+                    if (x === rightOffset + 20) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+            }
+            
+            // 绘制MRI图像
+            const imageSize = Math.min(rightWidth, height * 0.5);
+            const imageX = rightOffset + (rightWidth - imageSize) / 2;
+            const imageY = height * 0.5;
+            
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(imageX, imageY, imageSize, imageSize);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(imageX, imageY, imageSize, imageSize);
+            
+            // 根据对比度类型绘制简单的解剖结构
+            if (rfPulseApplied) {
+                // 绘制不同对比度的图像
+                if (contrastType === 0) {
+                    // T1加权图像（液体呈暗色，组织呈亮色）
+                    // 绘制简单的脑部结构
+                    ctx.fillStyle = '#d1d5db';
+                    ctx.beginPath();
+                    ctx.arc(imageX + imageSize / 2, imageY + imageSize / 2, imageSize / 3, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // 脑室（液体，更暗）
+                    ctx.fillStyle = '#9ca3af';
+                    ctx.beginPath();
+                    ctx.arc(imageX + imageSize / 2, imageY + imageSize / 2, imageSize / 6, 0, 2 * Math.PI);
+                    ctx.fill();
+                } else if (contrastType === 1) {
+                    // T2加权图像（液体呈亮色，组织呈暗色）
+                    // 绘制简单的脑部结构
+                    ctx.fillStyle = '#9ca3af';
+                    ctx.beginPath();
+                    ctx.arc(imageX + imageSize / 2, imageY + imageSize / 2, imageSize / 3, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // 脑室（液体，更亮）
+                    ctx.fillStyle = '#d1d5db';
+                    ctx.beginPath();
+                    ctx.arc(imageX + imageSize / 2, imageY + imageSize / 2, imageSize / 6, 0, 2 * Math.PI);
+                    ctx.fill();
+                } else if (contrastType === 2) {
+                    // PD加权图像（质子密度）
+                    // 模拟不同质子密度的组织
+                    const gradient = ctx.createLinearGradient(imageX, imageY, imageX + imageSize, imageY + imageSize);
+                    gradient.addColorStop(0, '#9ca3af');
+                    gradient.addColorStop(1, '#d1d5db');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(imageX, imageY, imageSize, imageSize);
+                }
+            }
+            
+            // 显示说明文字
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('磁场和原子核', leftWidth / 2 - 40, height - 10);
+            ctx.fillText('MRI信号和图像', rightOffset + rightWidth / 2 - 40, height - 10);
+            
+            // 弛豫过程模拟
+            if (rfPulseApplied) {
+                relaxationTime++;
+                if (relaxationTime > 100) {
+                    rfPulseApplied = false;
+                    relaxationTime = 0;
+                }
+            }
+        }
+        
+        // 应用RF脉冲按钮
+        document.getElementById('applyRFPulse').addEventListener('click', function() {
+            rfPulseApplied = true;
+            relaxationTime = 0;
+            drawMriImaging();
+        });
+        
+        // 切换对比度按钮
+        document.getElementById('changeContrast').addEventListener('click', function() {
+            contrastType = (contrastType + 1) % 3;
+            drawMriImaging();
+        });
+        
+        // 图像处理画布
+        const imageProcessingCtx = document.getElementById('imageProcessingCanvas').getContext('2d');
+        let processingMode = 0; // 0: 原始, 1: 平滑, 2: 锐化, 3: 边缘检测
+        
+        function drawImageProcessing() {
+            const canvas = document.getElementById('imageProcessingCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = canvas.parentElement.clientHeight;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制原始图像
+            const imageSize = Math.min(width * 0.8, height * 0.8);
+            const imageX = (width - imageSize) / 2;
+            const imageY = (height - imageSize) / 2;
+            
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(imageX, imageY, imageSize, imageSize);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(imageX, imageY, imageSize, imageSize);
+            
+            // 绘制测试图像
+            if (processingMode === 0 || processingMode === 1) {
+                // 原始图像或平滑后的图像
+                drawOriginalImage(ctx, imageX, imageY, imageSize);
+                
+                if (processingMode === 1) {
+                    // 应用高斯模糊效果（简化版）
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                    ctx.beginPath();
+                    ctx.arc(imageX + imageSize / 2, imageY + imageSize / 2, imageSize / 3, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+            } else if (processingMode === 2) {
+                // 锐化后的图像
+                drawOriginalImage(ctx, imageX, imageY, imageSize);
+                
+                // 模拟锐化效果（添加边缘增强）
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                
+                // 绘制主要边缘
+                ctx.beginPath();
+                ctx.arc(imageX + imageSize / 2, imageY + imageSize / 2, imageSize / 3, 0, 2 * Math.PI);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.arc(imageX + imageSize / 2, imageY + imageSize / 2, imageSize / 6, 0, 2 * Math.PI);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(imageX + imageSize / 4, imageY + imageSize / 4);
+                ctx.lineTo(imageX + imageSize * 3 / 4, imageY + imageSize * 3 / 4);
+                ctx.stroke();
+            } else if (processingMode === 3) {
+                // 边缘检测图像
+                ctx.fillStyle = '#e2e8f0';
+                ctx.fillRect(imageX, imageY, imageSize, imageSize);
+                
+                // 绘制边缘
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                
+                ctx.beginPath();
+                ctx.arc(imageX + imageSize / 2, imageY + imageSize / 2, imageSize / 3, 0, 2 * Math.PI);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.arc(imageX + imageSize / 2, imageY + imageSize / 2, imageSize / 6, 0, 2 * Math.PI);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(imageX + imageSize / 4, imageY + imageSize / 4);
+                ctx.lineTo(imageX + imageSize * 3 / 4, imageY + imageSize * 3 / 4);
+                ctx.stroke();
+            }
+            
+            // 显示处理模式文字
+            ctx.fillStyle = '#000';
+            ctx.font = '14px Arial';
+            let modeText = '';
+            if (processingMode === 0) modeText = '原始图像';
+            else if (processingMode === 1) modeText = '高斯平滑';
+            else if (processingMode === 2) modeText = '图像锐化';
+            else if (processingMode === 3) modeText = '边缘检测';
+            
+            ctx.fillText(modeText, width / 2 - ctx.measureText(modeText).width / 2, height - 10);
+        }
+        
+        // 绘制原始测试图像
+        function drawOriginalImage(ctx, x, y, size) {
+            // 绘制一个模拟的医学图像
+            
+            // 背景
+            ctx.fillStyle = '#d1d5db';
+            ctx.fillRect(x, y, size, size);
+            
+            // 圆形结构
+            ctx.fillStyle = '#9ca3af';
+            ctx.beginPath();
+            ctx.arc(x + size / 2, y + size / 2, size / 3, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 内部结构
+            ctx.fillStyle = '#6b7280';
+            ctx.beginPath();
+            ctx.arc(x + size / 2, y + size / 2, size / 6, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 线条结构
+            ctx.strokeStyle = '#4b5563';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(x + size / 4, y + size / 4);
+            ctx.lineTo(x + size * 3 / 4, y + size * 3 / 4);
+            ctx.stroke();
+        }
+        
+        // 平滑按钮
+        document.getElementById('applySmoothing').addEventListener('click', function() {
+            processingMode = 1;
+            drawImageProcessing();
+        });
+        
+        // 锐化按钮
+        document.getElementById('applySharpening').addEventListener('click', function() {
+            processingMode = 2;
+            drawImageProcessing();
+        });
+        
+        // 边缘检测按钮
+        document.getElementById('applyEdgeDetection').addEventListener('click', function() {
+            processingMode = 3;
+            drawImageProcessing();
+        });
+        
+        // 三维重建画布
+        const threeDReconstructionCtx = document.getElementById('3dReconstructionCanvas').getContext('2d');
+        let rotationAngle = 0;
+        let viewType = 0; // 0: 表面渲染, 1: 体绘制, 2: 最大密度投影
+        
+        function draw3DReconstruction() {
+            const canvas = document.getElementById('3dReconstructionCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = canvas.parentElement.clientHeight;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制3D模型（简化的2D表示）
+            const modelSize = Math.min(width * 0.8, height * 0.8);
+            const centerX = width / 2;
+            const centerY = height / 2;
+            
+            // 旋转效果
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(rotationAngle);
+            
+            if (viewType === 0) {
+                // 表面渲染
+                // 绘制一个简化的3D对象（使用透视效果）
+                const frontRadius = modelSize / 3;
+                const backRadius = modelSize / 4;
+                const depth = modelSize / 4;
+                
+                // 后椭圆
+                const backGradient = ctx.createLinearGradient(-backRadius, -backRadius, backRadius, backRadius);
+                backGradient.addColorStop(0, '#93c5fd');
+                backGradient.addColorStop(1, '#3b82f6');
+                ctx.fillStyle = backGradient;
+                ctx.beginPath();
+                ctx.ellipse(0, depth / 2, backRadius, backRadius / 2, 0, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // 连接前后的线条
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(-frontRadius, 0);
+                ctx.lineTo(-backRadius, depth / 2);
+                ctx.moveTo(frontRadius, 0);
+                ctx.lineTo(backRadius, depth / 2);
+                ctx.stroke();
+                
+                // 前椭圆
+                const frontGradient = ctx.createLinearGradient(-frontRadius, -frontRadius, frontRadius, frontRadius);
+                frontGradient.addColorStop(0, '#bfdbfe');
+                frontGradient.addColorStop(1, '#60a5fa');
+                ctx.fillStyle = frontGradient;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, frontRadius, frontRadius / 2, 0, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // 表面特征
+                ctx.strokeStyle = '#1d4ed8';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * 2 * Math.PI;
+                    const x = Math.cos(angle) * frontRadius * 0.8;
+                    const y = Math.sin(angle) * frontRadius * 0.4;
+                    
+                    ctx.beginPath();
+                    ctx.arc(x, y, frontRadius * 0.1, 0, 2 * Math.PI);
+                    ctx.stroke();
+                }
+            } else if (viewType === 1) {
+                // 体绘制（简化版）
+                const radius = modelSize / 3;
+                
+                // 绘制透明度渐变的圆，表示体绘制效果
+                for (let i = 0; i < 10; i++) {
+                    const currentRadius = radius * (1 - i * 0.1);
+                    const alpha = 0.1 * (10 - i);
+                    
+                    ctx.fillStyle = `rgba(59, 130, 246, ${alpha})`;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, currentRadius, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+                
+                // 内部结构
+                ctx.fillStyle = 'rgba(236, 72, 153, 0.5)';
+                ctx.beginPath();
+                ctx.arc(0, 0, radius * 0.5, 0, 2 * Math.PI);
+                ctx.fill();
+            } else if (viewType === 2) {
+                // 最大密度投影
+                const radius = modelSize / 3;
+                
+                // 绘制背景
+                ctx.fillStyle = '#e2e8f0';
+                ctx.beginPath();
+                ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // 绘制高密度结构
+                ctx.fillStyle = '#3b82f6';
+                
+                // 血管结构模拟
+                ctx.lineWidth = 5;
+                ctx.beginPath();
+                ctx.moveTo(-radius * 0.8, 0);
+                ctx.bezierCurveTo(-radius * 0.5, -radius * 0.3, radius * 0.5, -radius * 0.3, radius * 0.8, 0);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(-radius * 0.8, 0);
+                ctx.bezierCurveTo(-radius * 0.5, radius * 0.3, radius * 0.5, radius * 0.3, radius * 0.8, 0);
+                ctx.stroke();
+                
+                // 节点
+                ctx.beginPath();
+                ctx.arc(-radius * 0.8, 0, radius * 0.1, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(0, -radius * 0.4, radius * 0.1, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(0, radius * 0.4, radius * 0.1, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(radius * 0.8, 0, radius * 0.1, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+            
+            ctx.restore();
+            
+            // 显示视图类型
+            ctx.fillStyle = '#000';
+            ctx.font = '14px Arial';
+            let viewText = '';
+            if (viewType === 0) viewText = '表面渲染';
+            else if (viewType === 1) viewText = '体绘制';
+            else if (viewType === 2) viewText = '最大密度投影';
+            
+            ctx.fillText(viewText, width / 2 - ctx.measureText(viewText).width / 2, height - 10);
+            
+            // 自动旋转
+            rotationAngle += 0.005;
+            if (rotationAngle >= 2 * Math.PI) {
+                rotationAngle = 0;
+            }
+        }
+        
+        // 旋转3D模型按钮
+        document.getElementById('rotate3DModel').addEventListener('click', function() {
+            rotationAngle += Math.PI / 4;
+            if (rotationAngle >= 2 * Math.PI) {
+                rotationAngle -= 2 * Math.PI;
+            }
+            draw3DReconstruction();
+        });
+        
+        // 切换视图按钮
+        document.getElementById('changeView').addEventListener('click', function() {
+            viewType = (viewType + 1) % 3;
+            draw3DReconstruction();
+        });
+        
+        // 未来趋势画布
+        const futureTrendsCtx = document.getElementById('futureTrendsCanvas').getContext('2d');
+        
+        function drawFutureTrends() {
+            const canvas = document.getElementById('futureTrendsCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.parentElement.clientWidth;
+            const height = canvas.height = canvas.parentElement.clientHeight;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 获取选择的趋势类型
+            const trendType = document.getElementById('trendType').value;
+            
+            // 绘制坐标轴
+            const margin = 40;
+            const chartWidth = width - 2 * margin;
+            const chartHeight = height - 2 * margin;
+            
+            // X轴（年份）
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(margin, height - margin);
+            ctx.lineTo(width - margin, height - margin);
+            ctx.stroke();
+            
+            // Y轴（性能指标）
+            ctx.beginPath();
+            ctx.moveTo(margin, margin);
+            ctx.lineTo(margin, height - margin);
+            ctx.stroke();
+            
+            // 绘制网格线
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            
+            // 水平网格线
+            for (let i = 1; i < 5; i++) {
+                const y = height - margin - (i / 5) * chartHeight;
+                ctx.beginPath();
+                ctx.moveTo(margin, y);
+                ctx.lineTo(width - margin, y);
+                ctx.stroke();
+            }
+            
+            // 垂直网格线
+            for (let i = 1; i < 10; i++) {
+                const x = margin + (i / 10) * chartWidth;
+                ctx.beginPath();
+                ctx.moveTo(x, margin);
+                ctx.lineTo(x, height - margin);
+                ctx.stroke();
+            }
+            
+            // 绘制数据点
+            const years = [2000, 2005, 2010, 2015, 2020, 2025, 2030];
+            let data = [];
+            let yLabel = '';
+            
+            if (trendType === 'resolution') {
+                // 空间分辨率数据（mm）
+                data = [1, 0.5, 0.3, 0.15, 0.1, 0.05, 0.02];
+                yLabel = '分辨率 (mm)';
+            } else if (trendType === 'speed') {
+                // 成像速度数据（秒/帧）
+                data = [10, 5, 2, 0.5, 0.1, 0.01, 0.001];
+                yLabel = '速度 (秒/帧)';
+            } else if (trendType === 'contrast') {
+                // 对比度数据（对比噪声比）
+                data = [10, 20, 40, 80, 150, 250, 400];
+                yLabel = '对比噪声比';
+            }
+            
+            // 绘制曲线
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            for (let i = 0; i < years.length; i++) {
+                const year = years[i];
+                const value = data[i];
+                
+                // 计算坐标
+                const x = margin + ((year - 2000) / 30) * chartWidth;
+                let y;
+                
+                // 根据数据类型确定Y坐标（对数刻度）
+                if (trendType === 'contrast') {
+                    // 对比度使用对数刻度
+                    const minValue = Math.min(...data);
+                    const maxValue = Math.max(...data);
+                    const logMin = Math.log10(minValue);
+                    const logMax = Math.log10(maxValue);
+                    const normalized = (Math.log10(value) - logMin) / (logMax - logMin);
+                    y = height - margin - normalized * chartHeight;
+                } else {
+                    // 分辨率和速度使用对数刻度
+                    const minValue = Math.min(...data);
+                    const maxValue = Math.max(...data);
+                    const logMin = Math.log10(minValue);
+                    const logMax = Math.log10(maxValue);
+                    const normalized = 1 - (Math.log10(value) - logMin) / (logMax - logMin);
+                    y = height - margin - normalized * chartHeight;
+                }
+                
+                // 绘制数据点
+                ctx.fillStyle = '#2563eb';
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // 连接数据点
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            
+            ctx.stroke();
+            
+            // 绘制填充区域（表示置信区间）
+            ctx.fillStyle = 'rgba(37, 99, 235, 0.2)';
+            ctx.beginPath();
+            
+            // 上边界
+            for (let i = 0; i < years.length; i++) {
+                const year = years[i];
+                const value = data[i] * 1.2; // 假设+20%的误差
+                
+                const x = margin + ((year - 2000) / 30) * chartWidth;
+                let y;
+                
+                if (trendType === 'contrast') {
+                    const minValue = Math.min(...data);
+                    const maxValue = Math.max(...data);
+                    const logMin = Math.log10(minValue);
+                    const logMax = Math.log10(maxValue * 1.2);
+                    const normalized = (Math.log10(value) - logMin) / (logMax - logMin);
+                    y = height - margin - normalized * chartHeight;
+                } else {
+                    const minValue = Math.min(...data) * 0.8;
+                    const maxValue = Math.max(...data);
+                    const logMin = Math.log10(minValue);
+                    const logMax = Math.log10(maxValue);
+                    const normalized = 1 - (Math.log10(value) - logMin) / (logMax - logMin);
+                    y = height - margin - normalized * chartHeight;
+                }
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            
+            // 下边界（反向）
+            for (let i = years.length - 1; i >= 0; i--) {
+                const year = years[i];
+                const value = data[i] * 0.8; // 假设-20%的误差
+                
+                const x = margin + ((year - 2000) / 30) * chartWidth;
+                let y;
+                
+                if (trendType === 'contrast') {
+                    const minValue = Math.min(...data) * 0.8;
+                    const maxValue = Math.max(...data);
+                    const logMin = Math.log10(minValue);
+                    const logMax = Math.log10(maxValue);
+                    const normalized = (Math.log10(value) - logMin) / (logMax - logMin);
+                    y = height - margin - normalized * chartHeight;
+                } else {
+                    const minValue = Math.min(...data);
+                    const maxValue = Math.max(...data) * 1.2;
+                    const logMin = Math.log10(minValue);
+                    const logMax = Math.log10(maxValue);
+                    const normalized = 1 - (Math.log10(value) - logMin) / (logMax - logMin);
+                    y = height - margin - normalized * chartHeight;
+                }
+                
+                ctx.lineTo(x, y);
+            }
+            
+            ctx.closePath();
+            ctx.fill();
+            
+            // 绘制标签
+            ctx.fillStyle = '#000';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            
+            // 年份标签
+            for (let i = 0; i < years.length; i += 2) {
+                const year = years[i];
+                const x = margin + ((year - 2000) / 30) * chartWidth;
+                ctx.fillText(year.toString(), x, height - margin + 20);
+            }
+            
+            // Y轴标签
+            ctx.save();
+            ctx.translate(margin - 30, height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.textAlign = 'center';
+            ctx.fillText(yLabel, 0, 0);
+            ctx.restore();
+            
+            // 标题
+            ctx.textAlign = 'center';
+            let title = '';
+            if (trendType === 'resolution') title = '医学成像空间分辨率发展趋势';
+            else if (trendType === 'speed') title = '医学成像速度发展趋势';
+            else if (trendType === 'contrast') title = '医学成像对比度发展趋势';
+            
+            ctx.font = '16px Arial';
+            ctx.fillText(title, width / 2, margin - 10);
+        }
+        
+        // 趋势类型变更事件
+        document.getElementById('trendType').addEventListener('change', function() {
+            drawFutureTrends();
+        });
+        
+        // 窗口大小改变时重绘所有画布
+        function handleResize() {
+            drawRadonTransform();
+            drawFourierTransform();
+            drawMriImaging();
+            drawImageProcessing();
+            draw3DReconstruction();
+            drawFutureTrends();
+        }
+        
+        window.addEventListener('resize', handleResize);
+        
+        // 页面加载完成后初始化所有画布
+        window.addEventListener('load', function() {
+            handleResize();
+            
+            // 设置动画循环
+            function animate() {
+                drawRadonTransform();
+                drawMriImaging();
+                draw3DReconstruction();
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+        });
