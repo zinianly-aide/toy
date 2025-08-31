@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能高速公路 | 交通流量分析应用</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Chart.js用于数据可视化 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    
+    <!-- 配置Tailwind自定义颜色和字体 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        accent: '#f97316',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        math: ['STIX Two Math', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .canvas-container {
+                @apply relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg;
+            }
+            .section-fade {
+                @apply opacity-0 translate-y-8 transition-all duration-700;
+            }
+            .section-visible {
+                @apply opacity-100 translate-y-0;
+            }
+        }
+    </style>
+    
+    <style>
+        /* 基础样式 */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            background-color: #f8fafc;
+        }
+        
+        /* 数学符号显示优化 */
+        .math-expression {
+            font-family: 'STIX Two Math', serif;
+            font-size: 1.1em;
+        }
+        
+        /* Canvas容器样式 */
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 滚动条样式优化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+
+<body class="font-sans text-dark">
+    <!-- 导航栏 -->
+    <header id="navbar" class="fixed w-full z-50 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-calculator text-primary text-2xl"></i>
+                <h1 class="text-xl md:text-2xl font-bold text-primary">微积分直观理解</h1>
+            </div>
+            
+            <!-- 桌面导航 -->
+            <nav class="hidden md:flex space-x-8">
+                <a href="calculus-tutorial.html#intro" class="text-dark/80 hover:text-primary transition-colors">简介</a>
+                <a href="calculus-tutorial.html#derivative" class="text-dark/80 hover:text-primary transition-colors">导数</a>
+                <a href="calculus-tutorial.html#integral" class="text-dark/80 hover:text-primary transition-colors">积分</a>
+                <a href="calculus-tutorial.html#theorem" class="text-dark/80 hover:text-primary transition-colors">微积分基本定理</a>
+                <a href="calculus-tutorial.html#applications" class="text-primary font-medium">应用</a>
+            </nav>
+            
+            <!-- 移动端菜单按钮 -->
+            <button id="menu-toggle" class="md:hidden text-dark text-xl">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+        
+        <!-- 移动端导航菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="calculus-tutorial.html#intro" class="py-2 text-dark/80 hover:text-primary transition-colors">简介</a>
+                <a href="calculus-tutorial.html#derivative" class="py-2 text-dark/80 hover:text-primary transition-colors">导数</a>
+                <a href="calculus-tutorial.html#integral" class="py-2 text-dark/80 hover:text-primary transition-colors">积分</a>
+                <a href="calculus-tutorial.html#theorem" class="py-2 text-dark/80 hover:text-primary transition-colors">微积分基本定理</a>
+                <a href="calculus-tutorial.html#applications" class="py-2 text-primary font-medium">应用</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section class="pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-br from-primary/5 to-secondary/5">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-dark text-shadow">
+                    智能高速公路
+                </h1>
+                <p class="text-lg md:text-xl text-dark/70 mb-10">
+                    探索微积分在智能高速公路系统中的创新应用
+                </p>
+                <div class="flex justify-center">
+                    <a href="#details" class="px-8 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-1">
+                        了解详情 <i class="fa fa-arrow-down ml-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-4 py-12">
+        <!-- 智能高速公路详情 -->
+        <section id="details" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-primary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">智能高速公路的数学基础</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-16">
+                <div>
+                    <p class="text-lg mb-4">
+                        智能高速公路系统利用微积分原理实时监控和管理交通流量，通过建立精确的数学模型，实现道路资源的最优配置。
+                    </p>
+                    <p class="text-lg mb-4">
+                        核心数学模型包括：
+                    </p>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-start">
+                            <i class="fa fa-calculator text-primary mt-1 mr-2"></i>
+                            <span><strong>交通流微分方程</strong>：描述流量随时间和空间的变化</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-area-chart text-primary mt-1 mr-2"></i>
+                            <span><strong>速度-密度关系模型</strong>：预测不同密度下的车速</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-line-chart text-primary mt-1 mr-2"></i>
+                            <span><strong>动态优化算法</strong>：基于微积分的极值求解</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="canvas-container h-80">
+                    <canvas id="highwayFlowCanvas"></canvas>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        高速公路上的交通流分布模型
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 动态限速系统 -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-bold mb-6">动态限速系统的微积分原理</h3>
+                <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                    <p class="text-lg mb-4">
+                        动态限速系统是智能高速公路的核心功能之一，它基于实时交通数据，通过微积分算法计算最优限速值，实现：
+                    </p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>最大化道路通行能力</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>减少交通事故发生概率</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                            <span>平滑交通流，减少拥堵</span>
+                        </li>
+                    </ul>
+                    <div class="bg-primary/5 p-4 rounded-md text-center">
+                        <p class="font-medium mb-2">最优限速计算模型</p>
+                        <span class="math-expression">v_opt = v_f · exp(-k / k_c)</span>
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-10">
+                    <div class="canvas-container h-72">
+                        <canvas id="speedLimitCanvas"></canvas>
+                        <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                            动态限速与交通密度关系图
+                        </div>
+                    </div>
+                    
+                    <div class="canvas-container h-72">
+                        <canvas id="accidentRateCanvas"></canvas>
+                        <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                            事故率与车速、密度关系图
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 车道管理系统 -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-bold mb-6">智能车道管理系统</h3>
+                <div class="grid md:grid-cols-2 gap-10 items-center">
+                    <div>
+                        <p class="text-lg mb-4">
+                            智能车道管理系统通过分析交通流模式，动态调整车道功能，实现道路资源的优化配置。关键技术包括：
+                        </p>
+                        <ul class="space-y-3 mb-6">
+                            <li class="flex items-start">
+                                <i class="fa fa-road text-primary mt-1 mr-2"></i>
+                                <span><strong>可变车道控制</strong>：根据交通流向动态调整车道方向</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-car text-primary mt-1 mr-2"></i>
+                                <span><strong>特殊车辆优先车道</strong>：紧急情况下优先通行权分配</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-tachometer text-primary mt-1 mr-2"></i>
+                                <span><strong>速度分层策略</strong>：不同车道设置不同速度区间</span>
+                            </li>
+                        </ul>
+                        <p class="text-lg">
+                            这些策略的优化计算都基于微积分中的最优控制理论。
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-xl mb-4">车道分配模型</h4>
+                        <p class="mb-4">
+                            车道分配问题可以建模为一个优化问题，目标是最小化总旅行时间：
+                        </p>
+                        <div class="bg-primary/5 p-4 rounded-md mb-4 text-center">
+                            <span class="math-expression">T_total = ∫₀^L [1/(v(k(x))·w·(1-p))] dx</span>
+                        </div>
+                        <p class="text-sm text-dark/70">
+                            其中：L是道路长度，v(k(x))是位置x处的速度-密度函数，w是单车道宽度，p是车道宽度缩减因子。
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 实际案例 -->
+            <div>
+                <h3 class="text-2xl font-bold mb-6">全球智能高速公路案例</h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all">
+                        <div class="h-48 bg-gray-200 relative">
+                            <div class="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                                <i class="fa fa-road text-primary text-6xl"></i>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="font-bold text-xl mb-3">德国Autobahn智能系统</h4>
+                            <p class="text-dark/70 mb-4">
+                                德国高速公路系统采用了先进的交通流管理技术，使用微积分模型预测拥堵并实施动态限速，使道路容量提高了约20%。
+                            </p>
+                            <p class="text-dark/70">
+                                系统集成了超过10,000个传感器，实时采集交通数据并应用优化算法。
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all">
+                        <div class="h-48 bg-gray-200 relative">
+                            <div class="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                                <i class="fa fa-car text-primary text-6xl"></i>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="font-bold text-xl mb-3">美国I-15动态车道管理</h4>
+                            <p class="text-dark/70 mb-4">
+                                美国圣地亚哥的I-15高速公路实现了动态车道管理系统，根据实时交通流量调整车道方向，显著缓解了高峰时段拥堵。
+                            </p>
+                            <p class="text-dark/70">
+                                该系统使用微积分模型预测交通需求，提前30分钟调整车道配置。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="max-w-5xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                    <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                        <i class="fa fa-calculator text-white text-2xl"></i>
+                        <h2 class="text-xl font-bold">微积分直观理解</h2>
+                    </div>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-white/80 hover:text-white transition-colors">
+                            <i class="fa fa-github text-xl"></i>
+                        </a>
+                        <a href="#" class="text-white/80 hover:text-white transition-colors">
+                            <i class="fa fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-white/80 hover:text-white transition-colors">
+                            <i class="fa fa-linkedin text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="border-t border-white/20 pt-8 text-center text-white/60">
+                    <p>&copy; 2023 微积分直观理解 | 从基础到应用. 保留所有权利.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('py-2', 'shadow-md');
+                navbar.classList.remove('py-3', 'shadow-sm');
+            } else {
+                navbar.classList.add('py-3', 'shadow-sm');
+                navbar.classList.remove('py-2', 'shadow-md');
+            }
+        });
+        
+        // 移动端菜单切换
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // 滚动动画
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('section-visible');
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.section-fade').forEach(section => {
+            observer.observe(section);
+        });
+        
+        // 高速公路交通流分布图
+        const highwayFlowCtx = document.getElementById('highwayFlowCanvas').getContext('2d');
+        const highwayFlowChart = new Chart(highwayFlowCtx, {
+            type: 'line',
+            data: {
+                labels: ['入口', '1km', '2km', '3km', '4km', '5km', '6km', '7km', '8km', '9km', '出口'],
+                datasets: [
+                    {
+                        label: '流量 (辆/小时)',
+                        data: [1200, 1500, 1800, 1600, 1400, 1300, 1500, 1700, 1900, 1600, 1300],
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: '密度 (辆/km)',
+                        data: [40, 50, 60, 55, 45, 40, 48, 55, 65, 50, 40],
+                        borderColor: '#7c3aed',
+                        backgroundColor: 'rgba(124, 58, 237, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '高速公路上的交通流分布',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '位置'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: '数值'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 动态限速与密度关系图
+        const speedLimitCtx = document.getElementById('speedLimitCanvas').getContext('2d');
+        const speedLimitChart = new Chart(speedLimitCtx, {
+            type: 'line',
+            data: {
+                labels: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+                datasets: [
+                    {
+                        label: '建议限速 (km/h)',
+                        data: [120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20],
+                        borderColor: '#f97316',
+                        backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '动态限速与密度关系',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '相对密度 (%)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: '限速 (km/h)'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 事故率与车速、密度关系图
+        const accidentRateCtx = document.getElementById('accidentRateCanvas').getContext('2d');
+        const accidentRateChart = new Chart(accidentRateCtx, {
+            type: 'line',
+            data: {
+                labels: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+                datasets: [
+                    {
+                        label: '事故率 (次/百万车公里)',
+                        data: [0.5, 0.7, 1.0, 1.5, 2.2, 3.5, 5.0, 7.0, 9.5, 12.0, 15.0],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '事故率与相对密度关系',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '相对密度 (%)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: '事故率'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

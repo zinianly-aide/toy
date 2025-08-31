@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自适应交通信号 | 交通流量分析应用</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Chart.js用于数据可视化 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    
+    <!-- 配置Tailwind自定义颜色和字体 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        accent: '#f97316',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        math: ['STIX Two Math', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .canvas-container {
+                @apply relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg;
+            }
+            .section-fade {
+                @apply opacity-0 translate-y-8 transition-all duration-700;
+            }
+            .section-visible {
+                @apply opacity-100 translate-y-0;
+            }
+        }
+    </style>
+    
+    <style>
+        /* 基础样式 */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            background-color: #f8fafc;
+        }
+        
+        /* 数学符号显示优化 */
+        .math-expression {
+            font-family: 'STIX Two Math', serif;
+            font-size: 1.1em;
+        }
+        
+        /* Canvas容器样式 */
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 滚动条样式优化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+
+<body class="font-sans text-dark">
+    <!-- 导航栏 -->
+    <header id="navbar" class="fixed w-full z-50 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-calculator text-primary text-2xl"></i>
+                <h1 class="text-xl md:text-2xl font-bold text-primary">微积分直观理解</h1>
+            </div>
+            
+            <!-- 桌面导航 -->
+            <nav class="hidden md:flex space-x-8">
+                <a href="calculus-tutorial.html#intro" class="text-dark/80 hover:text-primary transition-colors">简介</a>
+                <a href="calculus-tutorial.html#derivative" class="text-dark/80 hover:text-primary transition-colors">导数</a>
+                <a href="calculus-tutorial.html#integral" class="text-dark/80 hover:text-primary transition-colors">积分</a>
+                <a href="calculus-tutorial.html#theorem" class="text-dark/80 hover:text-primary transition-colors">微积分基本定理</a>
+                <a href="calculus-tutorial.html#applications" class="text-primary font-medium">应用</a>
+            </nav>
+            
+            <!-- 移动端菜单按钮 -->
+            <button id="menu-toggle" class="md:hidden text-dark text-xl">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+        
+        <!-- 移动端导航菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="calculus-tutorial.html#intro" class="py-2 text-dark/80 hover:text-primary transition-colors">简介</a>
+                <a href="calculus-tutorial.html#derivative" class="py-2 text-dark/80 hover:text-primary transition-colors">导数</a>
+                <a href="calculus-tutorial.html#integral" class="py-2 text-dark/80 hover:text-primary transition-colors">积分</a>
+                <a href="calculus-tutorial.html#theorem" class="py-2 text-dark/80 hover:text-primary transition-colors">微积分基本定理</a>
+                <a href="calculus-tutorial.html#applications" class="py-2 text-primary font-medium">应用</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section class="pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-br from-primary/5 to-secondary/5">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-dark text-shadow">
+                    自适应交通信号
+                </h1>
+                <p class="text-lg md:text-xl text-dark/70 mb-10">
+                    探索微积分如何优化城市交通信号系统
+                </p>
+                <div class="flex justify-center">
+                    <a href="#details" class="px-8 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-1">
+                        了解详情 <i class="fa fa-arrow-down ml-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-4 py-12">
+        <!-- 自适应交通信号详情 -->
+        <section id="details" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-primary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">自适应交通信号系统原理</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-16">
+                <div>
+                    <p class="text-lg mb-4">
+                        自适应交通信号系统是一种能够根据实时交通状况自动调整信号灯配时的智能交通控制系统。它利用微积分原理分析交通流模式，并优化信号配时方案。
+                    </p>
+                    <p class="text-lg mb-4">
+                        核心数学原理包括：
+                    </p>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-start">
+                            <i class="fa fa-calculator text-primary mt-1 mr-2"></i>
+                            <span><strong>排队论模型</strong>：描述车辆到达与离开过程</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-area-chart text-primary mt-1 mr-2"></i>
+                            <span><strong>预测模型</strong>：基于导数的流量变化率预测</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-line-chart text-primary mt-1 mr-2"></i>
+                            <span><strong>最优化算法</strong>：求解最小化延误的最优解</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="canvas-container h-80">
+                    <canvas id="signalTimingCanvas"></canvas>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        自适应信号配时与固定配时效果对比
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 交通信号优化算法 -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-bold mb-6">微积分在信号配时优化中的应用</h3>
+                <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                    <p class="text-lg mb-4">
+                        自适应交通信号系统的核心是基于微积分的优化算法，它通过以下步骤计算最优配时：
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-bold mb-3 flex items-center">
+                                <i class="fa fa-clock-o text-primary mr-2"></i> 交通流分析
+                            </h4>
+                            <p class="text-dark/70">
+                                收集各方向车辆到达率和排队长度数据，建立交通流模型。
+                            </p>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-bold mb-3 flex items-center">
+                                <i class="fa fa-area-chart text-primary mr-2"></i> 预测计算
+                            </h4>
+                            <p class="text-dark/70">
+                                应用导数和微分方程预测未来短时间内的交通状况变化。
+                            </p>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-bold mb-3 flex items-center">
+                                <i class="fa fa-calculator text-primary mr-2"></i> 优化求解
+                            </h4>
+                            <p class="text-dark/70">
+                                建立目标函数，使用微积分求极值方法找到最优信号配时方案。
+                            </p>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-bold mb-3 flex items-center">
+                                <i class="fa fa-refresh text-primary mr-2"></i> 动态调整
+                            </h4>
+                            <p class="text-dark/70">
+                                根据实时反馈持续更新配时参数，实现闭环控制。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bg-primary/5 p-4 rounded-md text-center">
+                        <p class="font-medium mb-2">最小化延误的目标函数</p>
+                        <span class="math-expression">D_total = ∫₀^T [q(t)·(T - t)] dt</span>
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-10">
+                    <div class="canvas-container h-72">
+                        <canvas id="delayComparisonCanvas"></canvas>
+                        <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                            传统信号与自适应信号的延误对比
+                        </div>
+                    </div>
+                    
+                    <div class="canvas-container h-72">
+                        <canvas id="queueLengthCanvas"></canvas>
+                        <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                            排队长度随时间变化曲线
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 实际应用案例 -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-bold mb-6">自适应交通信号的全球应用</h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all">
+                        <div class="h-48 bg-gray-200 relative">
+                            <div class="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                                <i class="fa fa-traffic text-primary text-6xl"></i>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="font-bold text-xl mb-3">英国SCOOT系统</h4>
+                            <p class="text-dark/70 mb-4">
+                                SCOOT（Split Cycle Offset Optimization Technique）系统是世界上最早的自适应交通信号控制系统之一，它使用微积分算法实时优化信号配时。
+                            </p>
+                            <p class="text-dark/70">
+                                在伦敦的应用显示，该系统减少了约12%的车辆延误和10%的行程时间。
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all">
+                        <div class="h-48 bg-gray-200 relative">
+                            <div class="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                                <i class="fa fa-lightbulb-o text-primary text-6xl"></i>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="font-bold text-xl mb-3">美国SCATS系统</h4>
+                            <p class="text-dark/70 mb-4">
+                                SCATS（Sydney Coordinated Adaptive Traffic System）系统采用分布式控制策略，每个交叉路口根据实时交通状况独立调整信号配时。
+                            </p>
+                            <p class="text-dark/70">
+                                在多个城市的应用显示，该系统平均减少了20%的车辆延误和15%的燃油消耗。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 技术挑战与未来发展 -->
+            <div>
+                <h3 class="text-2xl font-bold mb-6">技术挑战与未来发展</h3>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-lg mb-4">
+                        尽管自适应交通信号系统取得了显著成功，但仍面临一些技术挑战：
+                    </p>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-start">
+                            <i class="fa fa-exclamation-triangle text-accent mt-1 mr-2"></i>
+                            <span><strong>实时数据采集与处理</strong>：需要高精度传感器网络和高性能计算系统</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-exclamation-triangle text-accent mt-1 mr-2"></i>
+                            <span><strong>多路口协调</strong>：复杂网络环境下的全局优化问题</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-exclamation-triangle text-accent mt-1 mr-2"></i>
+                            <span><strong>系统鲁棒性</strong>：应对异常交通状况的能力</span>
+                        </li>
+                    </ul>
+                    
+                    <p class="text-lg mb-4">
+                        未来的发展方向包括：
+                    </p>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fa fa-rocket text-primary mt-1 mr-2"></i>
+                            <span><strong>人工智能融合</strong>：机器学习与微积分模型相结合</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-rocket text-primary mt-1 mr-2"></i>
+                            <span><strong>车路协同</strong>：与自动驾驶车辆的信息交互</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-rocket text-primary mt-1 mr-2"></i>
+                            <span><strong>绿色交通优化</strong>：综合考虑环保因素的信号控制</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="max-w-5xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                    <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                        <i class="fa fa-calculator text-white text-2xl"></i>
+                        <h2 class="text-xl font-bold">微积分直观理解</h2>
+                    </div>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-white/80 hover:text-white transition-colors">
+                            <i class="fa fa-github text-xl"></i>
+                        </a>
+                        <a href="#" class="text-white/80 hover:text-white transition-colors">
+                            <i class="fa fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-white/80 hover:text-white transition-colors">
+                            <i class="fa fa-linkedin text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="border-t border-white/20 pt-8 text-center text-white/60">
+                    <p>&copy; 2023 微积分直观理解 | 从基础到应用. 保留所有权利.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('py-2', 'shadow-md');
+                navbar.classList.remove('py-3', 'shadow-sm');
+            } else {
+                navbar.classList.add('py-3', 'shadow-sm');
+                navbar.classList.remove('py-2', 'shadow-md');
+            }
+        });
+        
+        // 移动端菜单切换
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // 滚动动画
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('section-visible');
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.section-fade').forEach(section => {
+            observer.observe(section);
+        });
+        
+        // 信号配时对比图
+        const signalTimingCtx = document.getElementById('signalTimingCanvas').getContext('2d');
+        const signalTimingChart = new Chart(signalTimingCtx, {
+            type: 'line',
+            data: {
+                labels: ['6:00', '8:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'],
+                datasets: [
+                    {
+                        label: '自适应信号延误 (秒/辆)',
+                        data: [15, 30, 18, 22, 16, 25, 35, 20, 10],
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: '固定信号延误 (秒/辆)',
+                        data: [22, 45, 28, 30, 25, 38, 50, 30, 15],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '自适应信号与固定信号的延误对比',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '时间'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: '平均延误 (秒/辆)'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 延误对比图
+        const delayComparisonCtx = document.getElementById('delayComparisonCanvas').getContext('2d');
+        const delayComparisonChart = new Chart(delayComparisonCtx, {
+            type: 'bar',
+            data: {
+                labels: ['早高峰', '平峰期', '晚高峰', '夜间'],
+                datasets: [
+                    {
+                        label: '自适应信号延误 (秒/辆)',
+                        data: [28, 16, 32, 9],
+                        backgroundColor: 'rgba(37, 99, 235, 0.7)'
+                    },
+                    {
+                        label: '固定信号延误 (秒/辆)',
+                        data: [42, 25, 48, 14],
+                        backgroundColor: 'rgba(239, 68, 68, 0.7)'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '不同时段的延误对比',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '时段'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: '平均延误 (秒/辆)'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 排队长度随时间变化曲线
+        const queueLengthCtx = document.getElementById('queueLengthCanvas').getContext('2d');
+        const queueLengthChart = new Chart(queueLengthCtx, {
+            type: 'line',
+            data: {
+                labels: ['0s', '20s', '40s', '60s', '80s', '100s', '120s', '140s', '160s', '180s'],
+                datasets: [
+                    {
+                        label: '自适应信号排队长度 (米)',
+                        data: [0, 40, 70, 100, 80, 50, 20, 0, 30, 60],
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: '固定信号排队长度 (米)',
+                        data: [0, 50, 100, 150, 140, 120, 90, 50, 70, 110],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '排队长度随时间变化',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '时间 (秒)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: '排队长度 (米)'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交通网络设计 | 交通流量分析应用</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Chart.js用于数据可视化 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    
+    <!-- 配置Tailwind自定义颜色和字体 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        accent: '#f97316',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        math: ['STIX Two Math', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .canvas-container {
+                @apply relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg;
+            }
+            .section-fade {
+                @apply opacity-0 translate-y-8 transition-all duration-700;
+            }
+            .section-visible {
+                @apply opacity-100 translate-y-0;
+            }
+        }
+    </style>
+    
+    <style>
+        /* 基础样式 */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            background-color: #f8fafc;
+        }
+        
+        /* 数学符号显示优化 */
+        .math-expression {
+            font-family: 'STIX Two Math', serif;
+            font-size: 1.1em;
+        }
+        
+        /* Canvas容器样式 */
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 滚动条样式优化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+
+<body class="font-sans text-dark">
+    <!-- 导航栏 -->
+    <header id="navbar" class="fixed w-full z-50 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-calculator text-primary text-2xl"></i>
+                <h1 class="text-xl md:text-2xl font-bold text-primary">微积分直观理解</h1>
+            </div>
+            
+            <!-- 桌面导航 -->
+            <nav class="hidden md:flex space-x-8">
+                <a href="calculus-tutorial.html#intro" class="text-dark/80 hover:text-primary transition-colors">简介</a>
+                <a href="calculus-tutorial.html#derivative" class="text-dark/80 hover:text-primary transition-colors">导数</a>
+                <a href="calculus-tutorial.html#integral" class="text-dark/80 hover:text-primary transition-colors">积分</a>
+                <a href="calculus-tutorial.html#theorem" class="text-dark/80 hover:text-primary transition-colors">微积分基本定理</a>
+                <a href="calculus-tutorial.html#applications" class="text-primary font-medium">应用</a>
+            </nav>
+            
+            <!-- 移动端菜单按钮 -->
+            <button id="menu-toggle" class="md:hidden text-dark text-xl">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+        
+        <!-- 移动端导航菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="calculus-tutorial.html#intro" class="py-2 text-dark/80 hover:text-primary transition-colors">简介</a>
+                <a href="calculus-tutorial.html#derivative" class="py-2 text-dark/80 hover:text-primary transition-colors">导数</a>
+                <a href="calculus-tutorial.html#integral" class="py-2 text-dark/80 hover:text-primary transition-colors">积分</a>
+                <a href="calculus-tutorial.html#theorem" class="py-2 text-dark/80 hover:text-primary transition-colors">微积分基本定理</a>
+                <a href="calculus-tutorial.html#applications" class="py-2 text-primary font-medium">应用</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section class="pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-br from-primary/5 to-secondary/5">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-dark text-shadow">
+                    交通网络设计
+                </h1>
+                <p class="text-lg md:text-xl text-dark/70 mb-10">
+                    探索微积分在城市交通网络规划与优化中的关键作用
+                </p>
+                <div class="flex justify-center">
+                    <a href="#details" class="px-8 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-1">
+                        了解详情 <i class="fa fa-arrow-down ml-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-4 py-12">
+        <!-- 交通网络设计详情 -->
+        <section id="details" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-primary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">微积分与交通网络优化</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-16">
+                <div>
+                    <p class="text-lg mb-4">
+                        交通网络设计是城市规划的重要组成部分，微积分在优化道路网络结构、预测交通流量分布以及评估网络效率等方面发挥着关键作用。
+                    </p>
+                    <p class="text-lg mb-4">
+                        核心数学方法包括：
+                    </p>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-start">
+                            <i class="fa fa-calculator text-primary mt-1 mr-2"></i>
+                            <span><strong>网络流理论</strong>：基于微分方程的流量分配模型</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-area-chart text-primary mt-1 mr-2"></i>
+                            <span><strong>最优路径算法</strong>：梯度下降法求解最短路径</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-line-chart text-primary mt-1 mr-2"></i>
+                            <span><strong>容量约束模型</strong>：考虑道路容量限制的优化问题</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="canvas-container h-80">
+                    <canvas id="networkEfficiencyCanvas"></canvas>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        不同网络拓扑结构的效率对比
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 交通分配模型 -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-bold mb-6">交通分配的数学模型</h3>
+                <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                    <p class="text-lg mb-4">
+                        交通分配是交通网络设计的核心问题，它涉及如何将交通需求分配到道路网络上。微积分在建立和求解这些模型中发挥着关键作用。
+                    </p>
+                    <div class="grid md:grid-cols-3 gap-6 mb-6">
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-bold mb-3">用户均衡模型</h4>
+                            <p class="text-dark/70 text-sm">
+                                基于Wardrop第一原理，假设所有用户都选择最短路径，形成的平衡状态。
+                            </p>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-bold mb-3">系统最优模型</h4>
+                            <p class="text-dark/70 text-sm">
+                                基于Wardrop第二原理，目标是最小化系统总旅行时间，需要集中控制。
+                            </p>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-bold mb-3">随机用户均衡模型</h4>
+                            <p class="text-dark/70 text-sm">
+                                考虑用户感知误差，使用概率分布描述路径选择行为。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bg-primary/5 p-4 rounded-md text-center">
+                        <p class="font-medium mb-2">用户均衡条件</p>
+                        <span class="math-expression">对于被使用的路径，其旅行时间相等且最小；对于未被使用的路径，其旅行时间大于或等于最小旅行时间</span>
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-10">
+                    <div class="canvas-container h-72">
+                        <canvas id="trafficAssignmentCanvas"></canvas>
+                        <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                            不同交通分配模型的性能对比
+                        </div>
+                    </div>
+                    
+                    <div class="canvas-container h-72">
+                        <canvas id="roadCapacityCanvas"></canvas>
+                        <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                            道路容量与流量关系图
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 网络设计优化方法 -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-bold mb-6">网络设计优化方法</h3>
+                <div class="grid md:grid-cols-2 gap-10 items-center">
+                    <div>
+                        <p class="text-lg mb-4">
+                            交通网络设计问题可以表述为在预算约束下，选择最优的道路改进方案，以最小化系统总旅行时间。常用的优化方法包括：
+                        </p>
+                        <ul class="space-y-3 mb-6">
+                            <li class="flex items-start">
+                                <i class="fa fa-search text-primary mt-1 mr-2"></i>
+                                <span><strong>灵敏度分析</strong>：使用导数分析网络参数变化对系统性能的影响</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-line-chart text-primary mt-1 mr-2"></i>
+                                <span><strong>边际成本定价</strong>：基于微积分的拥挤收费模型</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-calculator text-primary mt-1 mr-2"></i>
+                                <span><strong>连续优化方法</strong>：将离散网络设计问题转化为连续问题求解</span>
+                            </li>
+                        </ul>
+                        <p class="text-lg">
+                            这些方法的核心都是利用微积分原理来求解优化问题。
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-xl mb-4">系统最优性条件</h4>
+                        <p class="mb-4">
+                            系统最优的一阶条件可以通过变分法推导得到：
+                        </p>
+                        <div class="bg-primary/5 p-4 rounded-md mb-4 text-center">
+                            <span class="math-expression">∂T_a/∂f_a + T_a = λ · ∂C_a/∂f_a</span>
+                        </div>
+                        <p class="text-sm text-dark/70">
+                            其中：T_a是路段a的旅行时间，f_a是路段a的流量，C_a是路段a的容量，λ是拉格朗日乘数。
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 实际案例 -->
+            <div>
+                <h3 class="text-2xl font-bold mb-6">交通网络设计的成功案例</h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all">
+                        <div class="h-48 bg-gray-200 relative">
+                            <div class="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                                <i class="fa fa-map-signs text-primary text-6xl"></i>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="font-bold text-xl mb-3">新加坡交通网络优化</h4>
+                            <p class="text-dark/70 mb-4">
+                                新加坡采用基于微积分的交通网络优化模型，实现了道路资源的高效利用。通过建立精确的数学模型，对道路网络进行了全面优化。
+                            </p>
+                            <p class="text-dark/70">
+                                该系统使新加坡在有限的道路资源条件下，保持了较高的交通运行效率，高峰时段平均车速保持在45km/h以上。
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all">
+                        <div class="h-48 bg-gray-200 relative">
+                            <div class="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                                <i class="fa fa-city text-primary text-6xl"></i>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="font-bold text-xl mb-3">哥本哈根自行车网络设计</h4>
+                            <p class="text-dark/70 mb-4">
+                                哥本哈根的自行车网络设计采用了微积分优化方法，建立了全连通的自行车道网络，并优化了各条路线的流量分配。
+                            </p>
+                            <p class="text-dark/70">
+                                该系统使哥本哈根的自行车出行比例达到了45%，成为世界上自行车友好城市的典范。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="max-w-5xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                    <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                        <i class="fa fa-calculator text-white text-2xl"></i>
+                        <h2 class="text-xl font-bold">微积分直观理解</h2>
+                    </div>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-white/80 hover:text-white transition-colors">
+                            <i class="fa fa-github text-xl"></i>
+                        </a>
+                        <a href="#" class="text-white/80 hover:text-white transition-colors">
+                            <i class="fa fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-white/80 hover:text-white transition-colors">
+                            <i class="fa fa-linkedin text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="border-t border-white/20 pt-8 text-center text-white/60">
+                    <p>&copy; 2023 微积分直观理解 | 从基础到应用. 保留所有权利.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('py-2', 'shadow-md');
+                navbar.classList.remove('py-3', 'shadow-sm');
+            } else {
+                navbar.classList.add('py-3', 'shadow-sm');
+                navbar.classList.remove('py-2', 'shadow-md');
+            }
+        });
+        
+        // 移动端菜单切换
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // 滚动动画
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('section-visible');
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.section-fade').forEach(section => {
+            observer.observe(section);
+        });
+        
+        // 网络效率对比图
+        const networkEfficiencyCtx = document.getElementById('networkEfficiencyCanvas').getContext('2d');
+        const networkEfficiencyChart = new Chart(networkEfficiencyCtx, {
+            type: 'radar',
+            data: {
+                labels: ['效率', '可靠性', '鲁棒性', '可达性', '容量利用率'],
+                datasets: [
+                    {
+                        label: '网格状网络',
+                        data: [75, 85, 90, 80, 70],
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                        pointBackgroundColor: '#2563eb',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#2563eb'
+                    },
+                    {
+                        label: '放射状网络',
+                        data: [85, 70, 60, 90, 85],
+                        borderColor: '#7c3aed',
+                        backgroundColor: 'rgba(124, 58, 237, 0.2)',
+                        pointBackgroundColor: '#7c3aed',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#7c3aed'
+                    },
+                    {
+                        label: '混合网络',
+                        data: [90, 80, 85, 85, 80],
+                        borderColor: '#f97316',
+                        backgroundColor: 'rgba(249, 115, 22, 0.2)',
+                        pointBackgroundColor: '#f97316',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#f97316'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '不同网络拓扑的性能对比',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            stepSize: 20
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 交通分配模型性能对比
+        const trafficAssignmentCtx = document.getElementById('trafficAssignmentCanvas').getContext('2d');
+        const trafficAssignmentChart = new Chart(trafficAssignmentCtx, {
+            type: 'bar',
+            data: {
+                labels: ['总旅行时间', '平均车速', '拥堵率', '可靠性', '公平性'],
+                datasets: [
+                    {
+                        label: '用户均衡',
+                        data: [85, 65, 75, 70, 80],
+                        backgroundColor: 'rgba(37, 99, 235, 0.7)'
+                    },
+                    {
+                        label: '系统最优',
+                        data: [60, 80, 50, 85, 65],
+                        backgroundColor: 'rgba(124, 58, 237, 0.7)'
+                    },
+                    {
+                        label: '随机用户均衡',
+                        data: [75, 70, 65, 75, 75],
+                        backgroundColor: 'rgba(249, 115, 22, 0.7)'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '不同交通分配模型的性能指标',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '性能指标'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: '相对值 (%)'
+                        },
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+        
+        // 道路容量与流量关系图
+        const roadCapacityCtx = document.getElementById('roadCapacityCanvas').getContext('2d');
+        const roadCapacityChart = new Chart(roadCapacityCtx, {
+            type: 'line',
+            data: {
+                labels: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+                datasets: [
+                    {
+                        label: '速度 (km/h)',
+                        data: [100, 95, 90, 85, 80, 70, 60, 50, 40, 30, 20],
+                        borderColor: '#2563eb',
+                        backgroundColor: 'transparent',
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: '流量 (辆/小时)',
+                        data: [0, 950, 1800, 2550, 3200, 3500, 3600, 3500, 3200, 2700, 2000],
+                        borderColor: '#f97316',
+                        backgroundColor: 'transparent',
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '道路容量与流量-速度关系',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '密度 (%)'
+                        }
+                    },
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: '速度 (km/h)'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: '流量 (辆/小时)'
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
