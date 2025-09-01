@@ -11,6 +11,9 @@
     <!-- 引入Chart.js用于数据可视化 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     
+    <!-- 引入自定义样式 -->
+    <link rel="stylesheet" href="../../static/css/styles.css">
+    
     <!-- 配置Tailwind自定义颜色和字体 -->
     <script>
         tailwind.config = {
@@ -107,11 +110,11 @@
             
             <!-- 桌面导航 -->
             <nav class="hidden md:flex space-x-8">
-                <a href="calculus-tutorial.html#intro" class="text-dark/80 hover:text-primary transition-colors">简介</a>
-                <a href="calculus-tutorial.html#derivative" class="text-dark/80 hover:text-primary transition-colors">导数</a>
-                <a href="calculus-tutorial.html#integral" class="text-dark/80 hover:text-primary transition-colors">积分</a>
-                <a href="calculus-tutorial.html#theorem" class="text-dark/80 hover:text-primary transition-colors">微积分基本定理</a>
-                <a href="calculus-tutorial.html#applications" class="text-primary font-medium">应用</a>
+                <a href="../tutorials/calculus-tutorial.html#intro" class="text-dark/80 hover:text-primary transition-colors">简介</a>
+                <a href="../tutorials/calculus-tutorial.html#derivative" class="text-dark/80 hover:text-primary transition-colors">导数</a>
+                <a href="../tutorials/calculus-tutorial.html#integral" class="text-dark/80 hover:text-primary transition-colors">积分</a>
+                <a href="../tutorials/calculus-tutorial.html#theorem" class="text-dark/80 hover:text-primary transition-colors">微积分基本定理</a>
+                <a href="../tutorials/calculus-tutorial.html#applications" class="text-primary font-medium">应用</a>
             </nav>
             
             <!-- 移动端菜单按钮 -->
@@ -123,11 +126,11 @@
         <!-- 移动端导航菜单 -->
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
             <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
-                <a href="calculus-tutorial.html#intro" class="py-2 text-dark/80 hover:text-primary transition-colors">简介</a>
-                <a href="calculus-tutorial.html#derivative" class="py-2 text-dark/80 hover:text-primary transition-colors">导数</a>
-                <a href="calculus-tutorial.html#integral" class="py-2 text-dark/80 hover:text-primary transition-colors">积分</a>
-                <a href="calculus-tutorial.html#theorem" class="py-2 text-dark/80 hover:text-primary transition-colors">微积分基本定理</a>
-                <a href="calculus-tutorial.html#applications" class="py-2 text-primary font-medium">应用</a>
+                <a href="../tutorials/calculus-tutorial.html#intro" class="py-2 text-dark/80 hover:text-primary transition-colors">简介</a>
+                <a href="../tutorials/calculus-tutorial.html#derivative" class="py-2 text-dark/80 hover:text-primary transition-colors">导数</a>
+                <a href="../tutorials/calculus-tutorial.html#integral" class="py-2 text-dark/80 hover:text-primary transition-colors">积分</a>
+                <a href="../tutorials/calculus-tutorial.html#theorem" class="py-2 text-dark/80 hover:text-primary transition-colors">微积分基本定理</a>
+                <a href="../tutorials/calculus-tutorial.html#applications" class="py-2 text-primary font-medium">应用</a>
             </div>
         </div>
     </header>
@@ -146,7 +149,7 @@
                     <a href="#marginal-analysis" class="px-8 py-3 bg-secondary text-white rounded-lg font-medium hover:bg-secondary/90 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-1">
                         开始探索 <i class="fa fa-arrow-right ml-2"></i>
                     </a>
-                    <a href="calculus-tutorial.html#applications" class="px-8 py-3 bg-white text-secondary border border-secondary rounded-lg font-medium hover:bg-secondary/5 transition-all">
+                    <a href="../tutorials/calculus-tutorial.html#applications" class="px-8 py-3 bg-white text-secondary border border-secondary rounded-lg font-medium hover:bg-secondary/5 transition-all">
                         返回应用列表
                     </a>
                 </div>
@@ -460,10 +463,10 @@
                         <h2 class="text-xl font-bold">微积分直观理解</h2>
                     </div>
                     <div class="flex space-x-6">
-                        <a href="calculus-tutorial.html#intro" class="text-white/70 hover:text-primary transition-colors">简介</a>
-                        <a href="calculus-tutorial.html#derivative" class="text-white/70 hover:text-primary transition-colors">导数</a>
-                        <a href="calculus-tutorial.html#integral" class="text-white/70 hover:text-primary transition-colors">积分</a>
-                        <a href="calculus-tutorial.html#applications" class="text-white/70 hover:text-primary transition-colors">应用</a>
+                        <a href="../tutorials/calculus-tutorial.html#intro" class="text-white/70 hover:text-primary transition-colors">简介</a>
+                    <a href="../tutorials/calculus-tutorial.html#derivative" class="text-white/70 hover:text-primary transition-colors">导数</a>
+                    <a href="../tutorials/calculus-tutorial.html#integral" class="text-white/70 hover:text-primary transition-colors">积分</a>
+                    <a href="../tutorials/calculus-tutorial.html#applications" class="text-white/70 hover:text-primary transition-colors">应用</a>
                     </div>
                 </div>
                 
@@ -1137,5 +1140,8 @@
             });
         });
     </script>
+    
+    <!-- 引入通用脚本 -->
+    <script src="../../static/js/main.js"></script>
 </body>
 </html>

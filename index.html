@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微积分教程与应用 | 理解微积分的力量</title>
+    <meta name="description" content="全面的微积分教程与应用实例，包括基础概念、实际应用、交通分析和环境模拟等">
+    <meta name="keywords" content="微积分, 教程, 应用, 物理, 经济, 工程, 交通, 环境">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    
+    <!-- 自定义样式 -->
+    <link rel="stylesheet" href="static/css/styles.css">
+    
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind 自定义配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6', // 蓝色
+                        secondary: '#10B981', // 绿色
+                        accent: '#F59E0B', // 橙色
+                        dark: '#1E293B', // 深蓝色文字
+                        light: '#F8FAFC', // 浅色背景
+                        muted: '#94A3B8' // 辅助文字色
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
+    
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .transition-custom {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-light text-dark min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md sticky top-0 z-50 transition-all duration-300">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-calculator text-primary text-2xl"></i>
+                <span class="font-bold text-xl text-primary">微积分教程</span>
+            </div>
+            
+            <!-- 桌面端菜单 -->
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#home" class="font-medium hover:text-primary transition-custom">首页</a>
+                <a href="#tutorials" class="font-medium hover:text-primary transition-custom">基础教程</a>
+                <a href="#applications" class="font-medium hover:text-primary transition-custom">实际应用</a>
+                <a href="#transportation" class="font-medium hover:text-primary transition-custom">交通分析</a>
+                <a href="#environment" class="font-medium hover:text-primary transition-custom">环境模拟</a>
+            </div>
+            
+            <!-- 移动端菜单按钮 -->
+            <button class="md:hidden text-dark text-xl mobile-menu-btn">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+        
+        <!-- 移动端菜单 -->
+        <div class="md:hidden hidden bg-white shadow-lg absolute w-full mobile-menu">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="#home" class="py-2 font-medium hover:text-primary transition-custom">首页</a>
+                <a href="#tutorials" class="py-2 font-medium hover:text-primary transition-custom">基础教程</a>
+                <a href="#applications" class="py-2 font-medium hover:text-primary transition-custom">实际应用</a>
+                <a href="#transportation" class="py-2 font-medium hover:text-primary transition-custom">交通分析</a>
+                <a href="#environment" class="py-2 font-medium hover:text-primary transition-custom">环境模拟</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 英雄区域 -->
+    <section id="home" class="bg-gradient-to-br from-primary/5 to-secondary/5 py-16 md:py-24">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
+            <div class="md:w-1/2 text-center md:text-left mb-10 md:mb-0">
+                <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold text-dark mb-6 leading-tight">
+                    理解微积分的<br><span class="text-primary">力量与应用</span>
+                </h1>
+                <p class="text-lg text-muted mb-8 max-w-lg mx-auto md:mx-0">
+                    从基础概念到前沿应用，探索微积分如何塑造我们理解世界的方式，解决现实问题。
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center md:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="#tutorials" class="btn-primary">
+                        开始学习 <i class="fa fa-arrow-right ml-2"></i>
+                    </a>
+                    <a href="#applications" class="btn-secondary">
+                        查看应用案例
+                    </a>
+                </div>
+            </div>
+            <div class="md:w-1/2 flex justify-center">
+                <div class="w-full max-w-md">
+                    <canvas id="heroChart" class="w-full h-64 md:h-80 bg-white rounded-xl shadow-lg"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 简介 -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="max-w-3xl mx-auto text-center mb-12">
+                <h2 class="text-[clamp(1.75rem,4vw,2.5rem)] font-bold text-dark mb-6">什么是微积分？</h2>
+                <p class="text-lg text-muted">
+                    微积分是研究变化率和累积量的数学分支，分为微分学和积分学两大部分。
+                    它不仅是现代数学的基础，也是物理学、工程学、经济学等多个领域的核心工具。
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="card p-6 fade-in" style="animation-delay: 0.1s">
+                    <div class="bg-primary/10 w-14 h-14 rounded-full flex items-center justify-center mb-6 mx-auto">
+                        <i class="fa fa-flask text-primary text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-center">变化与极限</h3>
+                    <p class="text-muted text-center">
+                        理解函数如何随变量变化，掌握极限概念是微积分的基础。
+                    </p>
+                </div>
+                
+                <div class="card p-6 fade-in" style="animation-delay: 0.3s">
+                    <div class="bg-secondary/10 w-14 h-14 rounded-full flex items-center justify-center mb-6 mx-auto">
+                        <i class="fa fa-area-chart text-secondary text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-center">微分学</h3>
+                    <p class="text-muted text-center">
+                        研究变化率、切线斜率、最大值和最小值等问题的数学工具。
+                    </p>
+                </div>
+                
+                <div class="card p-6 fade-in" style="animation-delay: 0.5s">
+                    <div class="bg-accent/10 w-14 h-14 rounded-full flex items-center justify-center mb-6 mx-auto">
+                        <i class="fa fa-integral text-accent text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-center">积分学</h3>
+                    <p class="text-muted text-center">
+                        处理面积、体积、累积量等问题，是微分学的逆运算。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 基础教程 -->
+    <section id="tutorials" class="py-16 bg-light section-fade">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-[clamp(1.75rem,4vw,2.5rem)] font-bold text-dark mb-4">基础教程</h2>
+                <p class="text-lg text-muted max-w-3xl mx-auto">
+                    从最基础的概念开始，循序渐进地学习微积分的核心知识。
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <div class="card overflow-hidden group">
+                    <div class="relative h-48 bg-primary/10">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-primary/80">
+                            <a href="content/tutorials/calculus-tutorial.html" class="text-white font-semibold px-6 py-2 border-2 border-white rounded-full hover:bg-white hover:text-primary transition-custom">
+                                开始学习 <i class="fa fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                        <i class="fa fa-book text-8xl text-primary/20 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-3">微积分基础入门</h3>
+                        <p class="text-muted mb-4">
+                            学习极限、导数、积分等基本概念，为后续学习打下坚实基础。
+                        </p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm bg-primary/10 text-primary px-3 py-1 rounded-full">初级</span>
+                            <span class="text-sm text-muted">预计学习时间: 8小时</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 实际应用 -->
+    <section id="applications" class="py-16 bg-white section-fade">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-[clamp(1.75rem,4vw,2.5rem)] font-bold text-dark mb-4">实际应用</h2>
+                <p class="text-lg text-muted max-w-3xl mx-auto">
+                    探索微积分在各个领域的实际应用，了解如何用数学解决现实问题。
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- 物理应用 -->
+                <div class="card overflow-hidden group">
+                    <div class="relative h-48 bg-primary/10">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-primary/80">
+                            <a href="content/applications/physics-applications.html" class="text-white font-semibold px-6 py-2 border-2 border-white rounded-full hover:bg-white hover:text-primary transition-custom">
+                                查看详情 <i class="fa fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                        <i class="fa fa-rocket text-8xl text-primary/20 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-3">物理应用</h3>
+                        <p class="text-muted mb-4">
+                            学习微积分在运动学、动力学、电磁学等物理学领域的应用。
+                        </p>
+                        <span class="text-sm bg-primary/10 text-primary px-3 py-1 rounded-full">中级</span>
+                    </div>
+                </div>
+                
+                <!-- 经济学应用 -->
+                <div class="card overflow-hidden group">
+                    <div class="relative h-48 bg-secondary/10">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-secondary/80">
+                            <a href="content/applications/economics-applications.html" class="text-white font-semibold px-6 py-2 border-2 border-white rounded-full hover:bg-white hover:text-secondary transition-custom">
+                                查看详情 <i class="fa fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                        <i class="fa fa-line-chart text-8xl text-secondary/20 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-3">经济学应用</h3>
+                        <p class="text-muted mb-4">
+                            探索微积分在优化问题、边际分析、弹性理论等经济学领域的应用。
+                        </p>
+                        <span class="text-sm bg-secondary/10 text-secondary px-3 py-1 rounded-full">中级</span>
+                    </div>
+                </div>
+                
+                <!-- 工程应用 -->
+                <div class="card overflow-hidden group">
+                    <div class="relative h-48 bg-accent/10">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-accent/80">
+                            <a href="content/applications/engineering-applications.html" class="text-white font-semibold px-6 py-2 border-2 border-white rounded-full hover:bg-white hover:text-accent transition-custom">
+                                查看详情 <i class="fa fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                        <i class="fa fa-cogs text-8xl text-accent/20 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-3">工程应用</h3>
+                        <p class="text-muted mb-4">
+                            了解微积分在结构分析、流体力学、控制系统等工程领域的应用。
+                        </p>
+                        <span class="text-sm bg-accent/10 text-accent px-3 py-1 rounded-full">高级</span>
+                    </div>
+                </div>
+                
+                <!-- 医学影像 -->
+                <div class="card overflow-hidden group">
+                    <div class="relative h-48 bg-purple-100">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-purple-500/80">
+                            <a href="content/applications/medical-imaging.html" class="text-white font-semibold px-6 py-2 border-2 border-white rounded-full hover:bg-white hover:text-purple-500 transition-custom">
+                                查看详情 <i class="fa fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                        <i class="fa fa-heartbeat text-8xl text-purple-200 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-3">医学影像</h3>
+                        <p class="text-muted mb-4">
+                            探索微积分在医学成像技术如CT扫描、MRI等中的数学原理。
+                        </p>
+                        <span class="text-sm bg-purple-100 text-purple-600 px-3 py-1 rounded-full">高级</span>
+                    </div>
+                </div>
+                
+                <!-- 计算机图形学 -->
+                <div class="card overflow-hidden group">
+                    <div class="relative h-48 bg-blue-100">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-blue-500/80">
+                            <a href="content/applications/computer-graphics.html" class="text-white font-semibold px-6 py-2 border-2 border-white rounded-full hover:bg-white hover:text-blue-500 transition-custom">
+                                查看详情 <i class="fa fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                        <i class="fa fa-paint-brush text-8xl text-blue-200 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-3">计算机图形学</h3>
+                        <p class="text-muted mb-4">
+                            学习微积分在3D建模、动画、渲染等计算机图形学领域的应用。
+                        </p>
+                        <span class="text-sm bg-blue-100 text-blue-600 px-3 py-1 rounded-full">中级</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 交通分析 -->
+    <section id="transportation" class="py-16 bg-light section-fade">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-[clamp(1.75rem,4vw,2.5rem)] font-bold text-dark mb-4">交通分析</h2>
+                <p class="text-lg text-muted max-w-3xl mx-auto">
+                    探索微积分如何帮助优化交通系统、分析交通流和设计智能交通网络。
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <!-- 交通流分析 -->
+                <div class="card overflow-hidden group">
+                    <div class="relative h-48 bg-green-100">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-green-500/80">
+                            <a href="content/transportation/traffic-flow-analysis.html" class="text-white font-semibold px-6 py-2 border-2 border-white rounded-full hover:bg-white hover:text-green-500 transition-custom">
+                                查看详情 <i class="fa fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                        <i class="fa fa-car text-8xl text-green-200 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-3">交通流分析</h3>
+                        <p class="text-muted mb-4">
+                            学习用微积分模型分析交通流量、密度和速度之间的关系。
+                        </p>
+                        <span class="text-sm bg-green-100 text-green-600 px-3 py-1 rounded-full">中级</span>
+                    </div>
+                </div>
+                
+                <!-- 自适应交通信号 -->
+                <div class="card overflow-hidden group">
+                    <div class="relative h-48 bg-red-100">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-red-500/80">
+                            <a href="content/transportation/adaptive-traffic-signal.html" class="text-white font-semibold px-6 py-2 border-2 border-white rounded-full hover:bg-white hover:text-red-500 transition-custom">
+                                查看详情 <i class="fa fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                        <i class="fa fa-traffic-light text-8xl text-red-200 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-3">自适应交通信号</h3>
+                        <p class="text-muted mb-4">
+                            探索微积分如何帮助设计自适应交通信号系统，优化路口通行效率。
+                        </p>
+                        <span class="text-sm bg-red-100 text-red-600 px-3 py-1 rounded-full">高级</span>
+                    </div>
+                </div>
+                
+                <!-- 交通网络设计 -->
+                <div class="card overflow-hidden group">
+                    <div class="relative h-48 bg-yellow-100">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-yellow-500/80">
+                            <a href="content/transportation/traffic-network-design.html" class="text-white font-semibold px-6 py-2 border-2 border-white rounded-full hover:bg-white hover:text-yellow-500 transition-custom">
+                                查看详情 <i class="fa fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                        <i class="fa fa-road text-8xl text-yellow-200 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-3">交通网络设计</h3>
+                        <p class="text-muted mb-4">
+                            了解如何用微积分方法优化交通网络拓扑结构和容量分配。
+                        </p>
+                        <span class="text-sm bg-yellow-100 text-yellow-600 px-3 py-1 rounded-full">高级</span>
+                    </div>
+                </div>
+                
+                <!-- 智能高速公路 -->
+                <div class="card overflow-hidden group">
+                    <div class="relative h-48 bg-indigo-100">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-indigo-500/80 z-10">
+                            <a href="content/transportation/smart-highway.html" class="text-white font-semibold px-6 py-2 border-2 border-white rounded-full hover:bg-white hover:text-indigo-500 transition-custom z-20">
+                                查看详情 <i class="fa fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                        <i class="fa fa-map text-8xl text-indigo-200 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-3">智能高速公路</h3>
+                        <p class="text-muted mb-4">
+                            探索微积分在智能高速公路系统中的应用，包括自动驾驶支持。
+                        </p>
+                        <span class="text-sm bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">高级</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 环境模拟 -->
+    <section id="environment" class="py-16 bg-white section-fade">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-[clamp(1.75rem,4vw,2.5rem)] font-bold text-dark mb-4">环境模拟</h2>
+                <p class="text-lg text-muted max-w-3xl mx-auto">
+                    了解微积分如何帮助模拟和预测环境变化，为环境保护提供科学依据。
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <!-- 天气预报 -->
+                <div class="card overflow-hidden group">
+                    <div class="relative h-48 bg-cyan-100">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-cyan-500/80">
+                            <a href="content/environment/weather-forecasting.html" class="text-white font-semibold px-6 py-2 border-2 border-white rounded-full hover:bg-white hover:text-cyan-500 transition-custom">
+                                查看详情 <i class="fa fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                        <i class="fa fa-cloud text-8xl text-cyan-200 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-3">天气预报</h3>
+                        <p class="text-muted mb-4">
+                            探索微积分在气象模型中的应用，了解天气预报的数学原理。
+                        </p>
+                        <span class="text-sm bg-cyan-100 text-cyan-600 px-3 py-1 rounded-full">高级</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 图表初始化和其他交互逻辑 -->
+    <script src="static/js/main.js"></script>
+    <script>
+        // 英雄区域图表
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('heroChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['x₀', 'x₁', 'x₂', 'x₃', 'x₄', 'x₅'],
+                        datasets: [{
+                            label: 'f(x)',
+                            data: [1, 3, 2, 5, 4, 6],
+                            borderColor: '#3B82F6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }, {
+                            label: 'f\'(x)',
+                            data: [2, -1, 3, -1, 2, 1],
+                            borderColor: '#10B981',
+                            backgroundColor: 'transparent',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-6">
+                        <i class="fa fa-calculator text-primary text-2xl"></i>
+                        <span class="font-bold text-xl">微积分教程</span>
+                    </div>
+                    <p class="text-gray-400">
+                        从基础到应用，全面学习微积分的知识与技能。
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-lg mb-4">快速链接</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#home" class="text-gray-400 hover:text-primary transition-custom">首页</a></li>
+                        <li><a href="#tutorials" class="text-gray-400 hover:text-primary transition-custom">基础教程</a></li>
+                        <li><a href="#applications" class="text-gray-400 hover:text-primary transition-custom">实际应用</a></li>
+                        <li><a href="#transportation" class="text-gray-400 hover:text-primary transition-custom">交通分析</a></li>
+                        <li><a href="#environment" class="text-gray-400 hover:text-primary transition-custom">环境模拟</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-lg mb-4">联系我们</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center space-x-2 text-gray-400">
+                            <i class="fa fa-envelope"></i>
+                            <span>contact@calculus-tutorial.com</span>
+                        </li>
+                        <li class="flex items-center space-x-2 text-gray-400">
+                            <i class="fa fa-phone"></i>
+                            <span>+86 123 4567 8910</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-lg mb-4">关注我们</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-custom">
+                            <i class="fa fa-weixin"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-custom">
+                            <i class="fa fa-weibo"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-custom">
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500">
+                <p>&copy; 2023 微积分教程与应用. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,99 @@
+/* 基础样式重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Tailwind配置 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 自定义工具类 */
+@layer utilities {
+    .content-auto {
+        content-visibility: auto;
+    }
+    .text-shadow {
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .transition-custom {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .canvas-container {
+        @apply relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg;
+    }
+    .section-fade {
+        @apply opacity-0 translate-y-8 transition-all duration-700;
+    }
+    .section-visible {
+        @apply opacity-100 translate-y-0;
+    }
+}
+
+/* 全局样式 */
+body {
+    @apply bg-light min-h-screen font-inter text-dark;
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.8s ease forwards;
+}
+
+/* 响应式图片 */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* 平滑滚动 */
+html {
+    scroll-behavior: smooth;
+}
+
+/* 导航栏样式 */
+nav a {
+    position: relative;
+}
+
+nav a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: theme('colors.primary');
+    transition: width 0.3s ease;
+}
+
+nav a:hover::after {
+    width: 100%;
+}
+
+/* 按钮样式 */
+.btn-primary {
+    @apply bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-custom transform hover:-translate-y-1;
+}
+
+.btn-secondary {
+    @apply bg-secondary hover:bg-secondary/90 text-white font-semibold py-3 px-8 rounded-full shadow-md hover:shadow-lg transition-custom;
+}
+
+/* 卡片样式 */
+.card {
+    @apply bg-light rounded-xl shadow-md hover:shadow-xl transition-custom overflow-hidden border border-gray-100;
+}

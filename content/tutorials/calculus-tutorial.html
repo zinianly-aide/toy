@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微积分直观理解 | 从基础到应用</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Chart.js用于数据可视化 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    
+    <!-- 引入自定义样式 -->
+    <link rel="stylesheet" href="../../static/css/styles.css">
+    
+    <!-- 配置Tailwind自定义颜色和字体 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#7c3aed',
+                        accent: '#f97316',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        math: ['STIX Two Math', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .canvas-container {
+                @apply relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg;
+            }
+            .section-fade {
+                @apply opacity-0 translate-y-8 transition-all duration-700;
+            }
+            .section-visible {
+                @apply opacity-100 translate-y-0;
+            }
+        }
+    </style>
+    
+    <style>
+        /* 基础样式 */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            background-color: #f8fafc;
+        }
+        
+        /* 数学符号显示优化 */
+        .math-expression {
+            font-family: 'STIX Two Math', serif;
+            font-size: 1.1em;
+        }
+        
+        /* Canvas容器样式 */
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 滚动条样式优化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+
+<body class="font-sans text-dark">
+    <!-- 导航栏 -->
+    <header id="navbar" class="fixed w-full z-50 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-calculator text-primary text-2xl"></i>
+                <h1 class="text-xl md:text-2xl font-bold text-primary">微积分直观理解</h1>
+            </div>
+            
+            <!-- 桌面导航 -->
+            <nav class="hidden md:flex space-x-8">
+                <a href="#intro" class="text-dark/80 hover:text-primary transition-colors">简介</a>
+                <a href="#derivative" class="text-dark/80 hover:text-primary transition-colors">导数</a>
+                <a href="#integral" class="text-dark/80 hover:text-primary transition-colors">积分</a>
+                <a href="#theorem" class="text-dark/80 hover:text-primary transition-colors">微积分基本定理</a>
+                <a href="#applications" class="text-dark/80 hover:text-primary transition-colors">应用</a>
+            </nav>
+            
+            <!-- 移动端菜单按钮 -->
+            <button id="menu-toggle" class="md:hidden text-dark text-xl">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+        
+        <!-- 移动端导航菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="#intro" class="py-2 text-dark/80 hover:text-primary transition-colors">简介</a>
+                <a href="#derivative" class="py-2 text-dark/80 hover:text-primary transition-colors">导数</a>
+                <a href="#integral" class="py-2 text-dark/80 hover:text-primary transition-colors">积分</a>
+                <a href="#theorem" class="py-2 text-dark/80 hover:text-primary transition-colors">微积分基本定理</a>
+                <a href="#applications" class="py-2 text-dark/80 hover:text-primary transition-colors">应用</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section class="pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-br from-primary/5 to-secondary/5">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-dark text-shadow">
+                    探索微积分的<span class="text-primary">奇妙世界</span>
+                </h1>
+                <p class="text-lg md:text-xl text-dark/70 mb-10">
+                    通过交互式可视化，直观理解微积分的核心概念、原理和应用
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="#derivative" class="px-8 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-1">
+                        开始学习 <i class="fa fa-arrow-right ml-2"></i>
+                    </a>
+                    <a href="#applications" class="px-8 py-3 bg-white text-primary border border-primary rounded-lg font-medium hover:bg-primary/5 transition-all">
+                        查看应用案例
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-4 py-12">
+        <!-- 简介部分 -->
+        <section id="intro" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-primary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">什么是微积分？</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center">
+                <div>
+                    <p class="text-lg mb-4">
+                        微积分是数学的一个分支，主要研究变化率和积累。它由艾萨克·牛顿和戈特弗里德·威廉·莱布尼茨在17世纪独立发展出来，是现代科学和工程学的基础。
+                    </p>
+                    <p class="text-lg mb-4">
+                        微积分分为两个主要部分：
+                    </p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-primary mt-1 mr-2"></i>
+                            <span><strong>微分学</strong>：研究变化率，核心概念是导数</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-right text-primary mt-1 mr-2"></i>
+                            <span><strong>积分学</strong>：研究积累，核心概念是积分</span>
+                        </li>
+                    </ul>
+                    <p class="text-lg">
+                        这两个分支通过"微积分基本定理"联系在一起，该定理揭示了导数和积分之间的逆运算关系。
+                    </p>
+                </div>
+                
+                <div class="canvas-container h-80">
+                    <canvas id="introCanvas"></canvas>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        微积分：变化与积累的数学
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 导数部分 -->
+        <section id="derivative" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-primary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">导数：变化率的度量</h2>
+            </div>
+            
+            <div class="mb-10">
+                <p class="text-lg mb-4">
+                    导数描述了函数在某一点的瞬时变化率。从几何角度看，函数在某点的导数就是该点切线的斜率。
+                </p>
+                <p class="text-lg mb-6">
+                    对于函数 <span class="math-expression">f(x)</span>，其在点 <span class="math-expression">x</span> 处的导数定义为：
+                </p>
+                <div class="bg-white p-4 rounded-lg shadow-sm mb-6 text-center">
+                    <span class="math-expression text-xl">f'(x) = lim<sub>h→0</sub> [f(x+h) - f(x)] / h</span>
+                </div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-10">
+                <div class="canvas-container h-96">
+                    <canvas id="derivativeCanvas"></canvas>
+                    <div class="absolute top-3 right-3 flex space-x-2">
+                        <button id="prevFunc" class="p-2 bg-primary/10 hover:bg-primary/20 rounded-full transition-colors">
+                            <i class="fa fa-arrow-left text-primary"></i>
+                        </button>
+                        <button id="nextFunc" class="p-2 bg-primary/10 hover:bg-primary/20 rounded-full transition-colors">
+                            <i class="fa fa-arrow-right text-primary"></i>
+                        </button>
+                    </div>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        拖动红点观察切线变化
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">导数的直观理解</h3>
+                    <p class="mb-4">
+                        想象你正在驾车，速度表显示的就是你位置函数的导数。它告诉你在每个瞬间，你的位置变化有多快。
+                    </p>
+                    <p class="mb-4">
+                        导数的正负表示函数是增加还是减少：
+                    </p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-up text-green-500 mt-1 mr-2"></i>
+                            <span>当 <span class="math-expression">f'(x) &gt; 0</span> 时，函数在该点递增</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-arrow-down text-red-500 mt-1 mr-2"></i>
+                            <span>当 <span class="math-expression">f'(x) &lt; 0</span> 时，函数在该点递减</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-minus text-gray-500 mt-1 mr-2"></i>
+                            <span>当 <span class="math-expression">f'(x) = 0</span> 时，函数在该点可能有极值</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="bg-primary/5 p-6 rounded-lg border border-primary/20">
+                <h3 class="text-xl font-semibold mb-3 flex items-center">
+                    <i class="fa fa-lightbulb-o text-primary mr-2"></i>
+                    常见函数的导数
+                </h3>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <span class="math-expression">f(x) = c (常数)</span>
+                        <span class="mx-2">→</span>
+                        <span class="math-expression">f'(x) = 0</span>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <span class="math-expression">f(x) = x<sup>n</sup></span>
+                        <span class="mx-2">→</span>
+                        <span class="math-expression">f'(x) = nx<sup>n-1</sup></span>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <span class="math-expression">f(x) = sin(x)</span>
+                        <span class="mx-2">→</span>
+                        <span class="math-expression">f'(x) = cos(x)</span>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <span class="math-expression">f(x) = e<sup>x</sup></span>
+                        <span class="mx-2">→</span>
+                        <span class="math-expression">f'(x) = e<sup>x</sup></span>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <span class="math-expression">f(x) = ln(x)</span>
+                        <span class="mx-2">→</span>
+                        <span class="math-expression">f'(x) = 1/x</span>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <span class="math-expression">f(x) = cos(x)</span>
+                        <span class="mx-2">→</span>
+                        <span class="math-expression">f'(x) = -sin(x)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 积分部分 -->
+        <section id="integral" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-primary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">积分：累积量的计算</h2>
+            </div>
+            
+            <div class="mb-10">
+                <p class="text-lg mb-4">
+                    积分表示函数曲线下的面积，也可以理解为累积和的极限。它是求导的逆运算。
+                </p>
+                <p class="text-lg mb-6">
+                    函数 <span class="math-expression">f(x)</span> 从 <span class="math-expression">a</span> 到 <span class="math-expression">b</span> 的定积分表示为：
+                </p>
+                <div class="bg-white p-4 rounded-lg shadow-sm mb-6 text-center">
+                    <span class="math-expression text-xl">∫<sub>a</sub><sup>b</sup> f(x)dx = lim<sub>n→∞</sub> Σ<sub>i=1</sub><sup>n</sup> f(x<sub>i</sub>)Δx</span>
+                </div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 items-center mb-10">
+                <div class="canvas-container h-80">
+                    <canvas id="integralCanvas"></canvas>
+                    <div class="absolute top-3 right-3 flex space-x-2">
+                        <button id="decreaseN" class="p-2 bg-primary/10 hover:bg-primary/20 rounded-full transition-colors">
+                            <i class="fa fa-minus text-primary"></i>
+                        </button>
+                        <span id="nValue" class="flex items-center justify-center px-3 py-2 text-sm bg-white rounded-full shadow-sm">分割数: 5</span>
+                        <button id="increaseN" class="p-2 bg-primary/10 hover:bg-primary/20 rounded-full transition-colors">
+                            <i class="fa fa-plus text-primary"></i>
+                        </button>
+                    </div>
+                    <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                        拖动端点调整积分区间
+                    </div>
+                    <div class="absolute bottom-3 right-3 text-sm">
+                        曲线下面积: <span id="areaValue" class="font-semibold text-primary">0</span>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">积分的直观理解</h3>
+                    <p class="mb-4">
+                        想象你正在测量一个不规则形状的面积。积分就是通过将这个形状分割成许多小矩形，计算每个小矩形的面积，然后将它们加起来得到总面积。
+                    </p>
+                    <p class="mb-4">
+                        积分在现实生活中的应用：
+                    </p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-start">
+                            <i class="fa fa-area-chart text-secondary mt-1 mr-2"></i>
+                            <span>计算不规则图形的面积</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-car text-secondary mt-1 mr-2"></i>
+                            <span>由速度求位移（积分速度函数）</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-dollar text-secondary mt-1 mr-2"></i>
+                            <span>计算消费者剩余和生产者剩余</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-tint text-secondary mt-1 mr-2"></i>
+                            <span>计算容器的体积</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 微积分基本定理 -->
+        <section id="theorem" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-primary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">微积分基本定理</h2>
+            </div>
+            
+            <div class="mb-10">
+                <p class="text-lg mb-6">
+                    微积分基本定理将微分和积分这两个看似无关的概念联系起来，它是微积分中最深刻和最重要的结果之一。
+                </p>
+                <div class="bg-gradient-to-r from-primary/10 to-secondary/10 p-6 rounded-lg border border-primary/20 mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-center">微积分基本定理</h3>
+                    <p class="text-center mb-4">
+                        <span class="math-expression text-2xl">d/dx [∫ₐˣ f(t)dt] = f(x)</span>
+                    </p>
+                    <p class="text-center">
+                        并且<br>
+                        <span class="math-expression text-2xl">∫ₐᵇ f(x)dx = F(b) - F(a)</span>
+                    </p>
+                    <p class="text-center mt-4 text-dark/70">
+                        其中 <span class="math-expression">F(x)</span> 是 <span class="math-expression">f(x)</span> 的一个原函数，即 <span class="math-expression">F'(x) = f(x)</span>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="canvas-container h-80 mb-10">
+                <canvas id="fundamentalTheoremCanvas"></canvas>
+                <div class="absolute bottom-3 left-3 text-sm text-dark/60">
+                    微积分基本定理：导数与积分的关系
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fa fa-lightbulb-o text-accent mr-2"></i>
+                    为什么基本定理如此重要？
+                </h3>
+                <p class="mb-4">
+                    微积分基本定理建立了导数和积分之间的深刻联系，它告诉我们：
+                </p>
+                <ul class="space-y-3 mb-4">
+                    <li class="flex items-start">
+                        <i class="fa fa-check-circle text-green-500 mt-1 mr-2"></i>
+                        <span>积分的导数就是被积函数本身</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa fa-check-circle text-green-500 mt-1 mr-2"></i>
+                        <span>一个函数在区间上的积分等于它的原函数在区间端点处的值之差</span>
+                    </li>
+                </ul>
+                <p>
+                    这个定理使得我们可以通过求原函数来计算定积分，而不必直接计算极限和求和，极大地简化了积分的计算过程。
+                </p>
+            </div>
+        </section>
+
+        <!-- 应用部分 -->
+        <section id="applications" class="max-w-5xl mx-auto mb-20 section-fade">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-1 bg-primary rounded-full mr-4"></div>
+                <h2 class="text-3xl font-bold">微积分的实际应用</h2>
+            </div>
+            
+            <p class="text-lg mb-10">
+                微积分不仅仅是抽象的数学概念，它在各个领域都有广泛的应用。以下是几个主要领域的应用示例：
+            </p>
+            
+            <div class="grid md:grid-cols-3 gap-6 mb-12">
+                <!-- 物理学应用 -->
+                <a href="../applications/physics-applications.html" class="block bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                    <div class="h-48 bg-primary/10 flex items-center justify-center">
+                        <canvas id="physicsCanvas" class="w-full h-full"></canvas>
+                    </div>
+                    <div class="p-5">
+                        <h3 class="text-xl font-semibold mb-2 flex items-center text-primary hover:text-primary/80">
+                            <i class="fa fa-rocket text-primary mr-2"></i>
+                            物理学
+                        </h3>
+                        <p class="text-dark/70">
+                            从运动学到热力学，从电磁学到量子力学，微积分都是描述物理现象的数学语言。
+                        </p>
+                    </div>
+                </a>
+                
+                <!-- 经济学应用 -->
+                <a href="../applications/economics-applications.html" class="block bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                    <div class="h-48 bg-secondary/10 flex items-center justify-center">
+                        <canvas id="economicsCanvas" class="w-full h-full"></canvas>
+                    </div>
+                    <div class="p-5">
+                        <h3 class="text-xl font-semibold mb-2 flex items-center text-primary hover:text-primary/80">
+                            <i class="fa fa-line-chart text-secondary mr-2"></i>
+                            经济学
+                        </h3>
+                        <p class="text-dark/70">
+                            在经济学中，边际成本和边际收益通过导数计算，消费者剩余和生产者剩余通过积分计算。
+                        </p>
+                    </div>
+                </a>
+                
+                <!-- 工程学应用 -->
+                <a href="../applications/engineering-applications.html" class="block bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                    <div class="h-48 bg-accent/10 flex items-center justify-center">
+                        <canvas id="engineeringCanvas" class="w-full h-full"></canvas>
+                    </div>
+                    <div class="p-5">
+                        <h3 class="text-xl font-semibold mb-2 flex items-center text-primary hover:text-primary/80">
+                            <i class="fa fa-cogs text-accent mr-2"></i>
+                            工程学
+                        </h3>
+                        <p class="text-dark/70">
+                            工程师使用微积分设计控制系统、分析结构稳定性、计算电路中的电流和电压变化等。
+                        </p>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="bg-primary/5 p-6 rounded-lg border border-primary/20">
+                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fa fa-lightbulb-o text-primary mr-2"></i>
+                    微积分在日常生活中的应用
+                </h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <a href="../environment/weather-forecasting.html" class="block font-medium mb-2 text-primary hover:text-primary/80 transition-colors">
+                            <h4>天气预报 <i class="fa fa-external-link ml-1 text-sm"></i></h4>
+                        </a>
+                        <p class="text-dark/70 mb-4">
+                            气象学家使用微积分建立天气模型，预测温度、气压和风速的变化。<a href="../environment/weather-forecasting.html" class="text-primary hover:underline">查看详细内容</a>
+                        </p>
+                        
+                        <a href="../applications/medical-imaging.html" class="block font-medium mb-2 text-primary hover:text-primary/80 transition-colors">
+                            <h4>医学成像 <i class="fa fa-external-link ml-1 text-sm"></i></h4>
+                        </a>
+                        <p class="text-dark/70">
+                            CT扫描和MRI技术利用微积分算法重建身体内部的三维图像。<a href="../applications/medical-imaging.html" class="text-primary hover:underline">查看详细内容</a>
+                        </p>
+                    </div>
+                    <div>
+                        <a href="../transportation/traffic-flow-analysis.html" class="block font-medium mb-2 text-primary hover:text-primary/80 transition-colors">
+                            <h4>交通流量分析 <i class="fa fa-external-link ml-1 text-sm"></i></h4>
+                        </a>
+                        <p class="text-dark/70 mb-4">
+                            交通工程师使用微积分模型分析和预测交通流量，优化交通信号。<a href="../transportation/traffic-flow-analysis.html" class="text-primary hover:underline">查看详细内容</a>
+                        </p>
+                        
+                        <a href="../applications/computer-graphics.html" class="block font-medium mb-2 text-primary hover:text-primary/80 transition-colors">
+                            <h4>计算机图形学 <i class="fa fa-external-link ml-1 text-sm"></i></h4>
+                        </a>
+                        <p class="text-dark/70">
+                            动画和游戏中的曲线、曲面和运动效果都是通过微积分计算实现的。<a href="../applications/computer-graphics.html" class="text-primary hover:underline">查看详细内容</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="max-w-5xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                    <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                        <i class="fa fa-calculator text-primary text-2xl"></i>
+                        <h2 class="text-xl font-bold">微积分直观理解</h2>
+                    </div>
+                    <div class="flex space-x-6">
+                        <a href="#intro" class="text-white/70 hover:text-primary transition-colors">简介</a>
+                        <a href="#derivative" class="text-white/70 hover:text-primary transition-colors">导数</a>
+                        <a href="#integral" class="text-white/70 hover:text-primary transition-colors">积分</a>
+                        <a href="#applications" class="text-white/70 hover:text-primary transition-colors">应用</a>
+                    </div>
+                </div>
+                
+                <div class="border-t border-white/10 pt-8 text-center text-white/60 text-sm">
+                    <p>© 2023 微积分直观理解. 本网站旨在通过交互式可视化帮助理解微积分概念。</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 引入外部JavaScript文件 -->
+    <script src="../../static/js/canvas-functions.js"></script>
+    <script src="../../static/js/main.js"></script>
+</body>
+</html>

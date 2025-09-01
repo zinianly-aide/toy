@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微积分深入解析</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            background-attachment: fixed;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 0 20px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+        
+        .breadcrumb {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+            padding: 5px 15px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.15);
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .breadcrumb a:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .breadcrumb a.active {
+            background: #667eea;
+            font-weight: bold;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        @media (min-width: 768px) {
+            .content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+        }
+        
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            border-bottom: 3px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            color: #5a67d8;
+            margin: 20px 0 15px;
+            font-size: 1.4rem;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        .canvas-container {
+            width: 100%;
+            height: 300px;
+            margin: 20px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f8f9fa;
+            position: relative;
+        }
+        
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .formula {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+            overflow-x: auto;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        button:hover {
+            background: #5a67d8;
+        }
+        
+        .example {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .example-title {
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .theorem {
+            background: #f9f4e6;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #e6a817;
+        }
+        
+        .theorem-title {
+            font-weight: bold;
+            color: #d35400;
+            margin-bottom: 8px;
+        }
+        
+        .interactive {
+            position: relative;
+        }
+        
+        .slider-container {
+            margin: 15px 0;
+        }
+        
+        .slider-container label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #e0e0e0;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid #667eea;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .application {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .application-title {
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .exercise {
+            background: #fff8e1;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .exercise-title {
+            font-weight: bold;
+            color: #e65100;
+            margin-bottom: 8px;
+        }
+        
+        .hint, .solution {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            background: #f5f5f5;
+            display: none;
+        }
+        
+        .toggle-hint {
+            background: #ffcc80;
+            color: #5d4037;
+            margin-top: 10px;
+            width: 100%;
+            text-align: left;
+            padding: 8px 15px;
+        }
+        
+        .toggle-solution {
+            background: #a5d6a7;
+            color: #1b5e20;
+            margin-top: 10px;
+            width: 100%;
+            text-align: left;
+            padding: 8px 15px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: white;
+            opacity: 0.8;
+            font-size: 0.9rem;
+            margin-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 20px;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            height: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: #667eea;
+            width: 25%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .difficulty {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+        
+        .difficulty.beginner {
+            background: #c8e6c9;
+            color: #1b5e20;
+        }
+        
+        .difficulty.intermediate {
+            background: #ffecb3;
+            color: #5d4037;
+        }
+        
+        .difficulty.advanced {
+            background: #ffcdd2;
+            color: #b71c1c;
+        }
+        
+        .historical {
+            background: #f3e5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #9c27b0;
+            font-style: italic;
+        }
+        
+        .historical-title {
+            font-weight: bold;
+            color: #7b1fa2;
+            margin-bottom: 8px;
+        }
+        
+        .graph-legend {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>微积分深度解析</h1>
+            <div class="subtitle">从基础概念到高级应用，通过交互式可视化深入理解微积分的核心思想与实际应用</div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <div class="breadcrumb">
+                <a href="#" class="active">基础概念</a>
+                <a href="#">导数进阶</a>
+                <a href="#">积分技巧</a>
+                <a href="#">多元微积分</a>
+                <a href="#">微分方程</a>
+            </div>
+        </header>
+        
+        <div class="content">
+            <div class="card">
+                <h2>微积分基础再探</h2>
+                <p>微积分是数学的一个分支，主要研究变化率（导数）和累积量（积分）之间的关系。它由艾萨克·牛顿和戈特弗里德·莱布尼茨在17世纪独立发展，是现代科学和工程学的基础。</p>
+                
+                <div class="historical">
+                    <div class="historical-title">历史背景</div>
+                    <p>虽然微积分的系统理论在17世纪才形成，但其思想可以追溯到古希腊。阿基米德使用"穷竭法"计算面积和体积，中国刘徽的"割圆术"也体现了极限思想。牛顿将其应用于物理学，而莱布尼茨发展了现代符号系统。</p>
+                </div>
+                
+                <h3>极限的严格定义</h3>
+                <p>极限是微积分的基石。ε-δ定义提供了极限的严格数学表述：</p>
+                
+                <div class="formula">lim<sub>x→a</sub> f(x) = L 当且仅当 对任意 ε > 0，存在 δ > 0，使得当 0 < |x - a| < δ 时，有 |f(x) - L| < ε</div>
+                
+                <p>这个定义精确描述了"当x无限接近a时，f(x)无限接近L"的直观概念。</p>
+                
+                <div class="canvas-container">
+                    <canvas id="epsilonDeltaCanvas"></canvas>
+                </div>
+                
+                <div class="slider-container">
+                    <label for="epsilon">ε: <span id="epsilonValue">0.5</span></label>
+                    <input type="range" id="epsilon" min="0.1" max="2" step="0.1" value="0.5">
+                </div>
+                
+                <div class="slider-container">
+                    <label for="delta">δ: <span id="deltaValue">0.3</span></label>
+                    <input type="range" id="delta" min="0.05" max="1" step="0.05" value="0.3">
+                </div>
+                
+                <div class="graph-legend">
+                    <div class="legend-item"><span class="legend-color" style="background: #667eea;"></span> f(x) = x²</div>
+                    <div class="legend-item"><span class="legend-color" style="background: #e53e3e;"></span> L + ε</div>
+                    <div class="legend-item"><span class="legend-color" style="background: #e53e3e;"></span> L - ε</div>
+                    <div class="legend-item"><span class="legend-color" style="background: #38a169;"></span> a + δ</div>
+                    <div class="legend-item"><span class="legend-color" style="background: #38a169;"></span> a - δ</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>导数的几何与物理意义</h2>
+                <p>导数不仅表示函数曲线的切线斜率，还具有丰富的物理意义。在物理学中，位置函数的导数是速度，速度函数的导数是加速度。</p>
+                
+                <div class="theorem">
+                    <div class="theorem-title">中值定理</div>
+                    <p>如果函数f在闭区间[a,b]上连续，在开区间(a,b)内可导，则存在c∈(a,b)，使得f'(c) = [f(b)-f(a)]/(b-a)</p>
+                    <p>几何解释：曲线上至少存在一点，其切线平行于连接区间端点的割线。</p>
+                </div>
+                
+                <div class="canvas-container">
+                    <canvas id="meanValueCanvas"></canvas>
+                </div>
+                
+                <div class="controls">
+                    <button id="animateMeanValue">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 0A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                            <path d="M6.271 5.055a.5.5 0 0 0-.52.038L3.5 7.028V5.5a.5.5 0 0 0-.5-.5H1.5a.5.5 0 0 0-.5.5v4.5a.5.5 0 0 0 .5.5H3a.5.5 0 0 0 .5-.5V8.972l2.25 1.815a.5.5 0 0 0 .329.115.5.5 0 0 0 .25-.063l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5a.5.5 0 0 0-.571.063z"/>
+                        </svg>
+                        动画演示
+                    </button>
+                    <button id="resetMeanValue">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 0A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                            <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.837c.11 0 .146-.08.155-.19l.597-6.57c.012-.139-.095-1.133-1.494-1.133H4.053c-1.399 0-1.507 1.007-1.494 1.133l.598 6.57c.009.11.045.19.155.19h.837a.237.237 0 0 0 .241-.247 1.007 1.007 0 0 1 .022-.227 1.005 1.005 0 0 1-.02-1.1 1.007 1.007 0 0 1-.002-.127H3.028c.006-.218.022-.426.054-.623.062-.39.204-.77.455-1.108.25-.337.605-.622 1.028-.81.423-.188.895-.274 1.378-.249.493.025.972.164 1.397.403.415.235.769.56.996.94.233.38.33.813.282 1.238a2.003 2.003 0 0 0-.196.867c-.051.201-.115.398-.19.59H8.18a1.007 1.007 0 0 1 .117.545c-.002.187-.009.373-.02.556l-.005.115h-.762a1.97 1.97 0 0 0-.02-1.176Z"/>
+                        </svg>
+                        重置
+                    </button>
+                </div>
+                
+                <div class="application">
+                    <div class="application-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM4.5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+                        </svg>
+                        物理应用：运动分析
+                    </div>
+                    <p>假设一个物体的位移函数为 s(t) = t³ - 6t² + 9t，其中t为时间（秒），s为位移（米）：</p>
+                    <ul style="padding-left: 20px; margin: 10px 0;">
+                        <li>速度函数 v(t) = s'(t) = 3t² - 12t + 9</li>
+                        <li>加速度函数 a(t) = v'(t) = 6t - 12</li>
+                    </ul>
+                    <p>当t=1秒时，v(1)=0，a(1)=-6 m/s²，物体瞬时静止但正在减速；当t=2秒时，a(2)=0，加速度为零，速度达到极值。</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="card">
+                <h2>积分的深入理解</h2>
+                <p>积分不仅用于计算面积，还代表累积过程。定积分是黎曼和的极限，而不定积分（原函数）与导数互为逆运算。</p>
+                
+                <div class="tabs">
+                    <div class="tab active" data-tab="riemann">黎曼和</div>
+                    <div class="tab" data-tab="fundamental">微积分基本定理</div>
+                    <div class="tab" data-tab="applications">应用实例</div>
+                </div>
+                
+                <div class="tab-content active" id="riemann-content">
+                    <h3>黎曼和与积分定义</h3>
+                    <p>将区间[a,b]分割为n个子区间，每个子区间取一点x<sub>i</sub>*，则黎曼和为 Σ f(x<sub>i</sub>*)Δx<sub>i</sub>。当分割无限细化时，黎曼和的极限即为定积分。</p>
+                    
+                    <div class="formula">∫<sub>a</sub><sup>b</sup> f(x)dx = lim<sub>maxΔx<sub>i</sub>→0</sub> Σ<sub>i=1</sub><sup>n</sup> f(x<sub>i</sub>*)Δx<sub>i</sub></div>
+                    
+                    <div class="canvas-container">
+                        <canvas id="riemannCanvas"></canvas>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label for="partitions">分区数量: <span id="partitionCount">8</span></label>
+                        <input type="range" id="partitions" min="2" max="50" value="8">
+                    </div>
+                    
+                    <div class="controls">
+                        <button id="leftSum">左端点和</button>
+                        <button id="rightSum">右端点和</button>
+                        <button id="midpointSum">中点和</button>
+                        <button id="trapezoidSum">梯形法</button>
+                    </div>
+                    
+                    <div class="example">
+                        <div class="example-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zM4.5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+                            </svg>
+                            例子：计算 ∫<sub>0</sub><sup>1</sup> x²dx
+                        </div>
+                        <p>使用n个等宽分区，右端点黎曼和为：(1/n)·Σ<sub>i=1</sub><sup>n</sup> (i/n)² = (1/n³)·Σi² = (1/n³)·[n(n+1)(2n+1)/6]</p>
+                        <p>当n→∞时，极限为 1/3，即 ∫<sub>0</sub><sup>1</sup> x²dx = 1/3</p>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="fundamental-content">
+                    <h3>微积分基本定理的深层理解</h3>
+                    <p>微积分基本定理建立了微分与积分的联系，表明它们是互逆运算。这不仅是一个计算工具，更是理解变化与累积关系的关键。</p>
+                    
+                    <div class="theorem">
+                        <div class="theorem-title">微积分基本定理（第一部分）</div>
+                        <p>如果f在[a,b]上连续，且F(x) = ∫<sub>a</sub><sup>x</sup> f(t)dt，则F在[a,b]上可导，且F'(x) = f(x)。</p>
+                    </div>
+                    
+                    <div class="theorem">
+                        <div class="theorem-title">微积分基本定理（第二部分）</div>
+                        <p>如果f在[a,b]上连续，且F是f的任意原函数，则∫<sub>a</sub><sup>b</sup> f(x)dx = F(b) - F(a)。</p>
+                    </div>
+                    
+                    <div class="canvas-container">
+                        <canvas id="fundamentalTheoremCanvas"></canvas>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label for="upperLimit">上限 b: <span id="upperLimitValue">2.0</span></label>
+                        <input type="range" id="upperLimit" min="0.5" max="3" step="0.1" value="2.0">
+                    </div>
+                    
+                    <div class="application">
+                        <div class="application-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM4.5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+                            </svg>
+                            应用：变力做功
+                        </div>
+                        <p>当力F随位置x变化时，从a到b所做的功为 W = ∫<sub>a</sub><sup>b</sup> F(x)dx。</p>
+                        <p>例如，弹簧的力F(x) = kx（胡克定律），则拉伸弹簧从0到L所做的功为 W = ∫<sub>0</sub><sup>L</sup> kx dx = (1/2)kL²。</p>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="applications-content">
+                    <h3>积分的实际应用</h3>
+                    
+                    <div class="application">
+                        <div class="application-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM4.5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+                            </svg>
+                            体积计算
+                        </div>
+                        <p>旋转体体积：将曲线y=f(x)绕x轴旋转，从a到b的体积为 V = π∫<sub>a</sub><sup>b</sup> [f(x)]²dx。</p>
+                        <p>例如，半圆y=√(r²-x²)绕x轴旋转形成球体，体积为 V = π∫<sub>-r</sub><sup>r</sup> (r²-x²)dx = (4/3)πr³。</p>
+                    </div>
+                    
+                    <div class="application">
+                        <div class="application-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM4.5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+                            </svg>
+                            概率密度函数
+                        </div>
+                        <p>在概率论中，连续随机变量X的概率密度函数f(x)满足 P(a≤X≤b) = ∫<sub>a</sub><sup>b</sup> f(x)dx。</p>
+                        <p>例如，标准正态分布的概率密度函数为 f(x) = (1/√(2π))e<sup>-x²/2</sup>，则 P(-1≤X≤1) ≈ 0.6827。</p>
+                    </div>
+                    
+                    <div class="canvas-container">
+                        <canvas id="probabilityCanvas"></canvas>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label for="zScore">Z分数: <span id="zScoreValue">1.0</span></label>
+                        <input type="range" id="zScore" min="0.5" max="3" step="0.1" value="1.0">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>高级微积分主题</h2>
+                
+                <h3>泰勒级数与函数近似</h3>
+                <p>泰勒级数将函数表示为无穷多项式之和，是微积分中强大的近似工具。在x=a处的泰勒级数为：</p>
+                
+                <div class="formula">f(x) = f(a) + f'(a)(x-a) + f''(a)/2!(x-a)² + f'''(a)/3!(x-a)³ + ...</div>
+                
+                <p>当a=0时，称为麦克劳林级数。泰勒级数在物理、工程和数值分析中有广泛应用。</p>
+                
+                <div class="canvas-container">
+                    <canvas id="taylorCanvas"></canvas>
+                </div>
+                
+                <div class="slider-container">
+                    <label for="terms">级数项数: <span id="termsValue">3</span></label>
+                    <input type="range" id="terms" min="1" max="10" value="3">
+                </div>
+                
+                <div class="example">
+                    <div class="example-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16zm0 0A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        </svg>
+                        例子：sin(x)的麦克劳林级数
+                    </div>
+                    <p>sin(x) = x - x³/3! + x⁵/5! - x⁷/7! + ...</p>
+                    <p>当|x|较小时，sin(x) ≈ x - x³/6 是很好的近似。例如，sin(0.5) ≈ 0.5 - (0.5)³/6 = 0.47917，而精确值约为0.47943，误差很小。</p>
+                </div>
+                
+                <h3>多元函数微积分</h3>
+                <p>多元微积分研究多变量函数的导数和积分。偏导数表示函数在某一变量方向上的变化率，而重积分用于计算多维空间中的体积等。</p>
+                
+                <div class="formula">∂f/∂x = lim<sub>h→0</sub> [f(x+h,y) - f(x,y)] / h</div>
+                
+                <div class="canvas-container">
+                    <canvas id="multivariableCanvas"></canvas>
+                </div>
+                
+                <div class="controls">
+                    <button id="showSurface">显示曲面</button>
+                    <button id="showContour">显示等高线</button>
+                    <button id="showGradient">显示梯度场</button>
+                </div>
+                
+                <div class="application">
+                    <div class="application-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM4.5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+                        </svg>
+                        优化问题
+                    </div>
+                    <p>在经济学中，利润函数P(x,y)依赖于两种产品的产量x和y。通过求解∂P/∂x=0和∂P/∂y=0，可以找到最大利润的生产方案。</p>
+                    <p>例如，若P(x,y) = 200x + 150y - 2x² - xy - y²，则最优解为x=50, y=50，最大利润为8750。</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="card">
+                <h2>微积分练习与挑战</h2>
+                
+                <div class="exercise">
+                    <div class="exercise-title">基础练习 <span class="difficulty beginner">入门</span></div>
+                    <p>求函数 f(x) = 3x² - 4x + 2 在 x=2 处的导数。</p>
+                    
+                    <button class="toggle-hint">显示提示</button>
+                    <div class="hint">
+                        <p>使用导数定义或幂法则：d/dx [x<sup>n</sup>] = nx<sup>n-1</sup></p>
+                    </div>
+                    
+                    <button class="toggle-solution">显示解答</button>
+                    <div class="solution">
+                        <p>f'(x) = 6x - 4</p>
+                        <p>f'(2) = 6(2) - 4 = 12 - 4 = 8</p>
+                    </div>
+                </div>
+                
+                <div class="exercise">
+                    <div class="exercise-title">中级练习 <span class="difficulty intermediate">进阶</span></div>
+                    <p>计算定积分 ∫<sub>1</sub><sup>2</sup> (x³ + 2x) dx。</p>
+                    
+                    <button class="toggle-hint">显示提示</button>
+                    <div class="hint">
+                        <p>使用微积分基本定理：先求原函数，再计算F(b) - F(a)</p>
+                    </div>
+                    
+                    <button class="toggle-solution">显示解答</button>
+                    <div class="solution">
+                        <p>原函数 F(x) = (1/4)x⁴ + x²</p>
+                        <p>∫<sub>1</sub><sup>2</sup> (x³ + 2x) dx = F(2) - F(1)</p>
+                        <p>= [(1/4)(16) + 4] - [(1/4)(1) + 1]</p>
+                        <p>= [4 + 4] - [0.25 + 1] = 8 - 1.25 = 6.75</p>
+                    </div>
+                </div>
+                
+                <div class="exercise">
+                    <div class="exercise-title">高级挑战 <span class="difficulty advanced">高级</span></div>
+                    <p>一个圆柱形容器高10米，底面半径2米，装满水。计算将水全部抽出所需的功。（水密度ρ=1000 kg/m³，重力加速度g=9.8 m/s²）</p>
+                    
+                    <button class="toggle-hint">显示提示</button>
+                    <div class="hint">
+                        <p>考虑水层厚度dy，位于高度y处，计算抽出该层水所需的功，然后积分。</p>
+                    </div>
+                    
+                    <button class="toggle-solution">显示解答</button>
+                    <div class="solution">
+                        <p>在高度y处，水层体积 dV = πr²dy = 4π dy</p>
+                        <p>水层质量 dm = ρdV = 4000π dy</p>
+                        <p>将该层水抽出需提升高度 (10-y) 米</p>
+                        <p>功 dW = dm·g·(10-y) = 4000π·9.8·(10-y) dy</p>
+                        <p>总功 W = ∫<sub>0</sub><sup>10</sup> 39200π(10-y) dy</p>
+                        <p>= 39200π [10y - y²/2]<sub>0</sub><sup>10</sup></p>
+                        <p>= 39200π (100 - 50) = 1,960,000π ≈ 6,157,521 焦耳</p>
+                    </div>
+                </div>
+                
+                <h3>微积分在现代科技中的应用</h3>
+                <div class="application">
+                    <div class="application-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM4.5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+                        </svg>
+                        机器学习中的梯度下降
+                    </div>
+                    <p>在机器学习中，梯度下降算法使用偏导数来最小化损失函数。参数更新规则为：</p>
+                    <div class="formula">θ<sub>new</sub> = θ<sub>old</sub> - α·∇J(θ)</div>
+                    <p>其中∇J(θ)是损失函数J关于参数θ的梯度，α是学习率。这个过程本质上是沿着函数下降最快的方向移动，直到找到最小值。</p>
+                </div>
+                
+                <div class="application">
+                    <div class="application-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM4.5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+                        </svg>
+                        信号处理中的傅里叶变换
+                    </div>
+                    <p>傅里叶变换将信号从时域转换到频域，其定义为：</p>
+                    <div class="formula">F(ω) = ∫<sub>-∞</sub><sup>∞</sup> f(t)e<sup>-iωt</sup>dt</div>
+                    <p>这在音频处理、图像压缩和通信系统中有广泛应用。微积分提供了理解和实现这些变换的数学基础。</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>微积分学习资源</h2>
+                
+                <h3>推荐教材</h3>
+                <ul style="padding-left: 20px; margin: 20px 0;">
+                    <li style="margin-bottom: 10px;"><strong>《微积分及其应用》</strong> - 适合初学者，强调应用和直观理解</li>
+                    <li style="margin-bottom: 10px;"><strong>《微积分：早期超越函数》</strong> - James Stewart 著，经典教材，内容全面</li>
+                    <li><strong>《数学分析原理》</strong> - Walter Rudin 著，适合进阶学习，强调严格性</li>
+                </ul>
+                
+                <h3>在线资源</h3>
+                <ul style="padding-left: 20px; margin: 20px 0;">
+                    <li style="margin-bottom: 10px;"><strong>Khan Academy 微积分课程</strong> - 免费视频教程，从基础到高级</li>
+                    <li style="margin-bottom: 10px;"><strong>3Blue1Brown 的"微积分的本质"</strong> - 通过可视化深入理解微积分概念</li>
+                    <li><strong>MIT OpenCourseWare</strong> - 免费大学微积分课程资料和讲座</li>
+                </ul>
+                
+                <h3>实用工具</h3>
+                <div class="example">
+                    <div class="example-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 13a6 6 0 1 1 0-12 6 6 0 0 1 0 12z"/>
+                            <path d="M8 4a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5H5a.5.5 0 0 1 0-1h2.5V4.5A.5.5 0 0 1 8 4z"/>
+                        </svg>
+                        符号计算工具
+                    </div>
+                    <p>使用Wolfram Alpha或Symbolab可以验证你的微积分计算，查看详细步骤。例如，输入"derivative of x^2"或"integral of sin(x)"。</p>
+                </div>
+                
+                <div class="example">
+                    <div class="example-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 13a6 6 0 1 1 0-12 6 6 0 0 1 0 12z"/>
+                            <path d="M8 4a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5H5a.5.5 0 0 1 0-1h2.5V4.5A.5.5 0 0 1 8 4z"/>
+                        </svg>
+                        可视化工具
+                    </div>
+                    <p>Desmos和GeoGebra提供强大的函数绘图和微积分可视化功能，可以帮助你直观理解导数、积分等概念。</p>
+                </div>
+                
+                <h3>学习建议</h3>
+                <div class="theorem">
+                    <div class="theorem-title">有效学习微积分的策略</div>
+                    <ol style="padding-left: 20px; margin-top: 10px;">
+                        <li style="margin-bottom: 10px;">理解概念而非死记公式：关注"为什么"而不仅仅是"怎么做"</li>
+                        <li style="margin-bottom: 10px;">多做可视化：画图帮助理解函数行为和几何意义</li>
+                        <li style="margin-bottom: 10px;">联系实际应用：了解微积分在物理、工程、经济等领域的应用</li>
+                        <li>循序渐进：从基础概念开始，逐步建立知识体系</li>
+                    </ol>
+                </div>
+                
+                <div class="historical">
+                    <div class="historical-title">微积分发展中的关键人物</div>
+                    <ul style="padding-left: 20px; margin-top: 10px;">
+                        <li style="margin-bottom: 8px;"><strong>艾萨克·牛顿</strong> (1643-1727)：发展了"流数术"，应用于物理学</li>
+                        <li style="margin-bottom: 8px;"><strong>戈特弗里德·莱布尼茨</strong> (1646-1716)：独立发展微积分，创造了现代符号系统</li>
+                        <li style="margin-bottom: 8px;"><strong>奥古斯丁·柯西</strong> (1789-1857)：为微积分提供了严格的数学基础</li>
+                        <li><strong>卡尔·魏尔斯特拉斯</strong> (1815-1897)：发展了ε-δ极限定义，使微积分更加严谨</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>微积分深度解析 | 通过交互式可视化理解数学之美 | 最后更新: 2023年10月</p>
+            <p>本工具旨在帮助学习者深入理解微积分概念，所有内容仅供参考教学使用</p>
+        </footer>
+    </div>
+
+    <script>
+        // 通用工具函数
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        
+        function toCanvasX(x, width, xRange) {
+            const [minX, maxX] = xRange;
+            return ((x - minX) / (maxX - minX)) * width;
+        }
+        
+        function toCanvasY(y, height, yRange) {
+            const [minY, maxY] = yRange;
+            return height - ((y - minY) / (maxY - minY)) * height;
+        }
+        
+        function fromCanvasX(canvasX, width, xRange) {
+            const [minX, maxX] = xRange;
+            return minX + (canvasX / width) * (maxX - minX);
+        }
+        
+        function fromCanvasY(canvasY, height, yRange) {
+            const [minY, maxY] = yRange;
+            return maxY - (canvasY / height) * (maxY - minY);
+        }
+        
+        function drawAxes(ctx, width, height, xRange, yRange) {
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 1;
+            
+            // x轴
+            ctx.beginPath();
+            ctx.moveTo(0, toCanvasY(0, height, yRange));
+            ctx.lineTo(width, toCanvasY(0, height, yRange));
+            ctx.stroke();
+            
+            // y轴
+            ctx.beginPath();
+            ctx.moveTo(toCanvasX(0, width, xRange), 0);
+            ctx.lineTo(toCanvasX(0, width, xRange), height);
+            ctx.stroke();
+            
+            // x轴刻度
+            ctx.fillStyle = '#666';
+            ctx.font = '12px Arial';
+            const xStep = (xRange[1] - xRange[0]) / 5;
+            for (let x = xRange[0]; x <= xRange[1]; x += xStep) {
+                const canvasX = toCanvasX(x, width, xRange);
+                ctx.beginPath();
+                ctx.moveTo(canvasX, toCanvasY(0, height, yRange) - 5);
+                ctx.lineTo(canvasX, toCanvasY(0, height, yRange) + 5);
+                ctx.stroke();
+                ctx.fillText(x.toFixed(1), canvasX - 10, toCanvasY(0, height, yRange) + 20);
+            }
+            
+            // y轴刻度
+            const yStep = (yRange[1] - yRange[0]) / 5;
+            for (let y = yRange[0]; y <= yRange[1]; y += yStep) {
+                const canvasY = toCanvasY(y, height, yRange);
+                ctx.beginPath();
+                ctx.moveTo(toCanvasX(0, width, xRange) - 5, canvasY);
+                ctx.lineTo(toCanvasX(0, width, xRange) + 5, canvasY);
+                ctx.stroke();
+                ctx.fillText(y.toFixed(1), toCanvasX(0, width, xRange) + 10, canvasY + 4);
+            }
+        }
+        
+        // ε-δ 定义可视化
+        const epsilonDeltaCanvas = document.getElementById('epsilonDeltaCanvas');
+        const epsilonDeltaCtx = epsilonDeltaCanvas.getContext('2d');
+        let epsilon = 0.5;
+        let delta = 0.3;
+        
+        function drawEpsilonDelta() {
+            const width = epsilonDeltaCanvas.width;
+            const height = epsilonDeltaCanvas.height;
+            const xRange = [-1, 3];
+            const yRange = [-0.5, 4];
+            
+            epsilonDeltaCtx.clearRect(0, 0, width, height);
+            drawAxes(epsilonDeltaCtx, width, height, xRange, yRange);
+            
+            // 绘制函数 f(x) = x²
+            epsilonDeltaCtx.strokeStyle = '#667eea';
+            epsilonDeltaCtx.lineWidth = 3;
+            epsilonDeltaCtx.beginPath();
+            
+            for (let x = xRange[0]; x <= xRange[1]; x += 0.01) {
+                const y = x * x;
+                if (x === xRange[0]) {
+                    epsilonDeltaCtx.moveTo(toCanvasX(x, width, xRange), toCanvasY(y, height, yRange));
+                } else {
+                    epsilonDeltaCtx.lineTo(toCanvasX(x, width, xRange), toCanvasY(y, height, yRange));
+                }
+            }
+            epsilonDeltaCtx.stroke();
+            
+            // 绘制 a 和 L
+            const a = 1;
+            const L = a * a; // f(a) = a²
+            
+            // 绘制 ε 区间
+            epsilonDeltaCtx.strokeStyle = '#e53e3e';
+            epsilonDeltaCtx.lineWidth = 1.5;
+            epsilonDeltaCtx.setLineDash([5, 5]);
+            
+            // 上边界
+            epsilonDeltaCtx.beginPath();
+            epsilonDeltaCtx.moveTo(0, toCanvasY(L + epsilon, height, yRange));
+            epsilonDeltaCtx.lineTo(width, toCanvasY(L + epsilon, height, yRange));
+            epsilonDeltaCtx.stroke();
+            
+            // 下边界
+            epsilonDeltaCtx.beginPath();
+            epsilonDeltaCtx.moveTo(0, toCanvasY(L - epsilon, height, yRange));
+            epsilonDeltaCtx.lineTo(width, toCanvasY(L - epsilon, height, yRange));
+            epsilonDeltaCtx.stroke();
+            epsilonDeltaCtx.setLineDash([]);
+            
+            // 绘制 δ 区间
+            epsilonDeltaCtx.strokeStyle = '#38a169';
+            epsilonDeltaCtx.lineWidth = 1.5;
+            epsilonDeltaCtx.setLineDash([5, 5]);
+            
+            // 右边界
+            epsilonDeltaCtx.beginPath();
+            epsilonDeltaCtx.moveTo(toCanvasX(a + delta, width, xRange), 0);
+            epsilonDeltaCtx.lineTo(toCanvasX(a + delta, width, xRange), height);
+            epsilonDeltaCtx.stroke();
+            
+            // 左边界
+            epsilonDeltaCtx.beginPath();
+            epsilonDeltaCtx.moveTo(toCanvasX(a - delta, width, xRange), 0);
+            epsilonDeltaCtx.lineTo(toCanvasX(a - delta, width, xRange), height);
+            epsilonDeltaCtx.stroke();
+            epsilonDeltaCtx.setLineDash([]);
+            
+            // 绘制点 (a, L)
+            epsilonDeltaCtx.fillStyle = '#333';
+            epsilonDeltaCtx.beginPath();
+            epsilonDeltaCtx.arc(toCanvasX(a, width, xRange), toCanvasY(L, height, yRange), 5, 0, 2 * Math.PI);
+            epsilonDeltaCtx.fill();
+            
+            // 添加标签
+            epsilonDeltaCtx.fillStyle = '#667eea';
+            epsilonDeltaCtx.font = '14px Arial';
+            epsilonDeltaCtx.fillText('f(x) = x²', toCanvasX(2.5, width, xRange), toCanvasY(3.5, height, yRange));
+            
+            epsilonDeltaCtx.fillStyle = '#e53e3e';
+            epsilonDeltaCtx.fillText(`L + ε = ${L.toFixed(1)} + ${epsilon.toFixed(1)} = ${(L+epsilon).toFixed(1)}`, 
+                toCanvasX(0.2, width, xRange), toCanvasY(L + epsilon + 0.1, height, yRange));
+            epsilonDeltaCtx.fillText(`L - ε = ${L.toFixed(1)} - ${epsilon.toFixed(1)} = ${(L-epsilon).toFixed(1)}`, 
+                toCanvasX(0.2, width, xRange), toCanvasY(L - epsilon - 0.3, height, yRange));
+            
+            epsilonDeltaCtx.fillStyle = '#38a169';
+            epsilonDeltaCtx.fillText(`a + δ = ${a.toFixed(1)} + ${delta.toFixed(1)} = ${(a+delta).toFixed(1)}`, 
+                toCanvasX(a + delta + 0.1, width, xRange), toCanvasY(0.3, height, yRange));
+            epsilonDeltaCtx.fillText(`a - δ = ${a.toFixed(1)} - ${delta.toFixed(1)} = ${(a-delta).toFixed(1)}`, 
+                toCanvasX(a - delta - 0.8, width, xRange), toCanvasY(0.3, height, yRange));
+            
+            // 说明文字
+            epsilonDeltaCtx.fillStyle = '#333';
+            epsilonDeltaCtx.font = '13px Arial';
+            epsilonDeltaCtx.fillText(`当 x ∈ (a-δ, a+δ) 时，f(x) ∈ (L-ε, L+ε)`, 
+                toCanvasX(0.5, width, xRange), toCanvasY(3.8, height, yRange));
+            
+            // 检查是否满足条件
+            let satisfies = true;
+            for (let x = a - delta + 0.01; x < a + delta; x += 0.01) {
+                const y = x * x;
+                if (y < L - epsilon || y > L + epsilon) {
+                    satisfies = false;
+                    break;
+                }
+            }
+            
+            epsilonDeltaCtx.fillStyle = satisfies ? '#38a169' : '#e53e3e';
+            epsilonDeltaCtx.font = 'bold 14px Arial';
+            epsilonDeltaCtx.fillText(satisfies ? "ε-δ 条件满足" : "ε-δ 条件不满足", 
+                toCanvasX(0.5, width, xRange), toCanvasY(0.5, height, yRange));
+        }
+        
+        document.getElementById('epsilon').addEventListener('input', function() {
+            epsilon = parseFloat(this.value);
+            document.getElementById('epsilonValue').textContent = epsilon.toFixed(1);
+            drawEpsilonDelta();
+        });
+        
+        document.getElementById('delta').addEventListener('input', function() {
+            delta = parseFloat(this.value);
+            document.getElementById('deltaValue').textContent = delta.toFixed(1);
+            drawEpsilonDelta();
+        });
+        
+        // 中值定理可视化
+        const meanValueCanvas = document.getElementById('meanValueCanvas');
+        const meanValueCtx = meanValueCanvas.getContext('2d');
+        let meanValueAnimation = null;
+        let currentC = 1.0;
+        
+        function f(x) {
+            return x * x * x / 6 - x * x / 2 + 2; // 三次函数，有局部极大极小值
+        }
+        
+        function fPrime(x) {
+            return x * x / 2 - x; // 导数
+        }
+        
+        function drawMeanValue() {
+            const width = meanValueCanvas.width;
+            const height = meanValueCanvas.height;
+            const xRange = [0, 4];
+            const yRange = [0, 3];
+            
+            meanValueCtx.clearRect(0, 0, width, height);
+            drawAxes(meanValueCtx, width, height, xRange, yRange);
+            
+            // 绘制函数曲线
+            meanValueCtx.strokeStyle = '#667eea';
+            meanValueCtx.lineWidth = 3;
+            meanValueCtx.beginPath();
+            
+            for (let x = xRange[0]; x <= xRange[1]; x += 0.01) {
+                const y = f(x);
+                if (x === xRange[0]) {
+                    meanValueCtx.moveTo(toCanvasX(x, width, xRange), toCanvasY(y, height, yRange));
+                } else {
+                    meanValueCtx.lineTo(toCanvasX(x, width, xRange), toCanvasY(y, height, yRange));
+                }
+            }
+            meanValueCtx.stroke();
+            
+            // 绘制端点
+            const a = 0.5, b = 3.5;
+            const fa = f(a), fb = f(b);
+            
+            meanValueCtx.fillStyle = '#e53e3e';
+            meanValueCtx.beginPath();
+            meanValueCtx.arc(toCanvasX(a, width, xRange), toCanvasY(fa, height, yRange), 6, 0, 2 * Math.PI);
+            meanValueCtx.fill();
+            
+            meanValueCtx.beginPath();
+            meanValueCtx.arc(toCanvasX(b, width, xRange), toCanvasY(fb, height, yRange), 6, 0, 2 * Math.PI);
+            meanValueCtx.fill();
+            
+            // 绘制割线
+            meanValueCtx.strokeStyle = '#e53e3e';
+            meanValueCtx.lineWidth = 2;
+            meanValueCtx.setLineDash([5, 5]);
+            meanValueCtx.beginPath();
+            meanValueCtx.moveTo(toCanvasX(a, width, xRange), toCanvasY(fa, height, yRange));
+            meanValueCtx.lineTo(toCanvasX(b, width, xRange), toCanvasY(fb, height, yRange));
+            meanValueCtx.stroke();
+            meanValueCtx.setLineDash([]);
+            
+            // 计算割线斜率
+            const secantSlope = (fb - fa) / (b - a);
+            
+            // 绘制切线
+            meanValueCtx.strokeStyle = '#38a169';
+            meanValueCtx.lineWidth = 2;
+            
+            // 找到切线平行于割线的点（中值定理保证存在）
+            let c = currentC;
+            const tangentSlope = fPrime(c);
+            
+            meanValueCtx.beginPath();
+            const tangentY1 = tangentSlope * (xRange[0] - c) + f(c);
+            const tangentY2 = tangentSlope * (xRange[1] - c) + f(c);
+            meanValueCtx.moveTo(toCanvasX(xRange[0], width, xRange), toCanvasY(tangentY1, height, yRange));
+            meanValueCtx.lineTo(toCanvasX(xRange[1], width, xRange), toCanvasY(tangentY2, height, yRange));
+            meanValueCtx.stroke();
+            
+            // 绘制切点
+            meanValueCtx.fillStyle = '#38a169';
+            meanValueCtx.beginPath();
+            meanValueCtx.arc(toCanvasX(c, width, xRange), toCanvasY(f(c), height, yRange), 6, 0, 2 * Math.PI);
+            meanValueCtx.fill();
+            
+            // 添加标签
+            meanValueCtx.fillStyle = '#333';
+            meanValueCtx.font = '14px Arial';
+            meanValueCtx.fillText(`f(x) = x³/6 - x²/2 + 2`, toCanvasX(0.5, width, xRange), toCanvasY(2.8, height, yRange));
+            meanValueCtx.fillText(`a = ${a.toFixed(1)}, b = ${b.toFixed(1)}`, toCanvasX(0.5, width, xRange), toCanvasY(2.5, height, yRange));
+            meanValueCtx.fillText(`割线斜率 = ${secantSlope.toFixed(3)}`, toCanvasX(0.5, width, xRange), toCanvasY(2.2, height, yRange));
+            meanValueCtx.fillText(`f'(${c.toFixed(2)}) = ${tangentSlope.toFixed(3)}`, toCanvasX(0.5, width, xRange), toCanvasY(1.9, height, yRange));
+            
+            // 显示中值定理条件
+            meanValueCtx.fillStyle = Math.abs(tangentSlope - secantSlope) < 0.01 ? '#38a169' : '#e53e3e';
+            meanValueCtx.font = 'bold 14px Arial';
+            meanValueCtx.fillText(`f'(c) = [f(b)-f(a)]/(b-a)`, 
+                toCanvasX(0.5, width, xRange), toCanvasY(0.5, height, yRange));
+        }
+        
+        document.getElementById('animateMeanValue').addEventListener('click', function() {
+            if (meanValueAnimation) {
+                clearInterval(meanValueAnimation);
+                meanValueAnimation = null;
+                this.textContent = '动画演示';
+                this.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 0A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path d="M6.271 5.055a.5.5 0 0 0-.52.038L3.5 7.028V5.5a.5.5 0 0 0-.5-.5H1.5a.5.5 0 0 0-.5.5v4.5a.5.5 0 0 0 .5.5H3a.5.5 0 0 0 .5-.5V8.972l2.25 1.815a.5.5 0 0 0 .329.115.5.5 0 0 0 .25-.063l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5a.5.5 0 0 0-.571.063z"/>
+                </svg> 动画演示`;
+            } else {
+                currentC = 0.6;
+                meanValueAnimation = setInterval(() => {
+                    currentC += 0.05;
+                    if (currentC > 3.4) {
+                        clearInterval(meanValueAnimation);
+                        meanValueAnimation = null;
+                        document.getElementById('animateMeanValue').textContent = '动画演示';
+                        document.getElementById('animateMeanValue').innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 0A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                            <path d="M6.271 5.055a.5.5 0 0 0-.52.038L3.5 7.028V5.5a.5.5 0 0 0-.5-.5H1.5a.5.5 0 0 0-.5.5v4.5a.5.5 0 0 0 .5.5H3a.5.5 0 0 0 .5-.5V8.972l2.25 1.815a.5.5 0 0 0 .329.115.5.5 0 0 0 .25-.063l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5a.5.5 0 0 0-.571.063z"/>
+                        </svg> 动画演示`;
+                    }
+                    drawMeanValue();
+                }, 300);
+                this.textContent = '停止动画';
+                this.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 0A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.837c.11 0 .146-.08.155-.19l.597-6.57c.012-.139-.095-1.133-1.494-1.133H4.053c-1.399 0-1.507 1.007-1.494 1.133l.598 6.57c.009.11.045.19.155.19h.837a.237.237 0 0 0 .241-.247 1.007 1.007 0 0 1 .022-.227 1.005 1.005 0 0 1-.02-1.1 1.007 1.007 0 0 1-.002-.127H3.028c.006-.218.022-.426.054-.623.062-.39.204-.77.455-1.108.25-.337.605-.622 1.028-.81.423-.188.895-.274 1.378-.249.493.025.972.164 1.397.403.415.235.769.56.996.94.233.38.33.813.282 1.238a2.003 2.003 0 0 0-.196.867c-.051.201-.115.398-.19.59H8.18a1.007 1.007 0 0 1 .117.545c-.002.187-.009.373-.02.556l-.005.115h-.762a1.97 1.97 0 0 0-.02-1.176Z"/>
+                </svg> 停止动画`;
+            }
+        });
+        
+        document.getElementById('resetMeanValue').addEventListener('click', function() {
+            if (meanValueAnimation) {
+                clearInterval(meanValueAnimation);
+                meanValueAnimation = null;
+                document.getElementById('animateMeanValue').textContent = '动画演示';
+                document.getElementById('animateMeanValue').innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 0A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path d="M6.271 5.055a.5.5 0 0 0-.52.038L3.5 7.028V5.5a.5.5 0 0 0-.5-.5H1.5a.5.5 0 0 0-.5.5v4.5a.5.5 0 0 0 .5.5H3a.5.5 0 0 0 .5-.5V8.972l2.25 1.815a.5.5 0 0 0 .329.115.5.5 0 0 0 .25-.063l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5a.5.5 0 0 0-.571.063z"/>
+                </svg> 动画演示`;
+            }
+            currentC = 1.0;
+            drawMeanValue();
+        });
+        
+        // 黎曼和可视化
+        const riemannCanvas = document.getElementById('riemannCanvas');
+        const riemannCtx = riemannCanvas.getContext('2d');
+        let partitions = 8;
+        let riemannType = 'right'; // 'left', 'right', 'midpoint', 'trapezoid'
+        
+        function g(x) {
+            return Math.sin(x) + 1; // 正弦函数上移，确保非负
+        }
+        
+        function drawRiemann() {
+            const width = riemannCanvas.width;
+            const height = riemannCanvas.height;
+            const xRange = [0, Math.PI * 2];
+            const yRange = [0, 2.5];
+            
+            riemannCtx.clearRect(0, 0, width, height);
+            drawAxes(riemannCtx, width, height, xRange, yRange);
+            
+            // 绘制函数曲线
+            riemannCtx.strokeStyle = '#667eea';
+            riemannCtx.lineWidth = 3;
+            riemannCtx.beginPath();
+            
+            for (let x = xRange[0]; x <= xRange[1]; x += 0.01) {
+                const y = g(x);
+                if (x === xRange[0]) {
+                    riemannCtx.moveTo(toCanvasX(x, width, xRange), toCanvasY(y, height, yRange));
+                } else {
+                    riemannCtx.lineTo(toCanvasX(x, width, xRange), toCanvasY(y, height, yRange));
+                }
+            }
+            riemannCtx.stroke();
+            
+            // 绘制黎曼和
+            const a = 0, b = Math.PI * 2;
+            const dx = (b - a) / partitions;
+            
+            riemannCtx.fillStyle = 'rgba(236, 201, 75, 0.5)';
+            riemannCtx.strokeStyle = '#ecc94b';
+            riemannCtx.lineWidth = 1;
+            
+            let totalArea = 0;
+            
+            for (let i = 0; i < partitions; i++) {
+                const xLeft = a + i * dx;
+                const xRight = xLeft + dx;
+                const xMid = (xLeft + xRight) / 2;
+                
+                let xEval, height;
+                
+                if (riemannType === 'left') {
+                    xEval = xLeft;
+                } else if (riemannType === 'right') {
+                    xEval = xRight;
+                } else if (riemannType === 'midpoint') {
+                    xEval = xMid;
+                } else { // trapezoid
+                    xEval = null;
+                }
+                
+                if (riemannType !== 'trapezoid') {
+                    height = g(xEval);
+                    totalArea += height * dx;
+                    
+                    // 绘制矩形
+                    riemannCtx.fillRect(
+                        toCanvasX(xLeft, width, xRange),
+                        toCanvasY(height, height, yRange),
+                        toCanvasX(dx, width, xRange),
+                        toCanvasY(0, height, yRange) - toCanvasY(height, height, yRange)
+                    );
+                    
+                    riemannCtx.strokeRect(
+                        toCanvasX(xLeft, width, xRange),
+                        toCanvasY(height, height, yRange),
+                        toCanvasX(dx, width, xRange),
+                        toCanvasY(0, height, yRange) - toCanvasY(height, height, yRange)
+                    );
+                } else {
+                    const heightLeft = g(xLeft);
+                    const heightRight = g(xRight);
+                    height = (heightLeft + heightRight) / 2;
+                    totalArea += height * dx;
+                    
+                    // 绘制梯形
+                    riemannCtx.beginPath();
+                    riemannCtx.moveTo(toCanvasX(xLeft, width, xRange), toCanvasY(0, height, yRange));
+                    riemannCtx.lineTo(toCanvasX(xRight, width, xRange), toCanvasY(0, height, yRange));
+                    riemannCtx.lineTo(toCanvasX(xRight, width, xRange), toCanvasY(heightRight, height, yRange));
+                    riemannCtx.lineTo(toCanvasX(xLeft, width, xRange), toCanvasY(heightLeft, height, yRange));
+                    riemannCtx.closePath();
+                    riemannCtx.fill();
+                    riemannCtx.stroke();
+                }
+                
+                // 绘制评估点
+                if (riemannType !== 'trapezoid') {
+                    riemannCtx.fillStyle = '#e53e3e';
+                    riemannCtx.beginPath();
+                    riemannCtx.arc(
+                        toCanvasX(xEval, width, xRange),
+                        toCanvasY(height, height, yRange),
+                        4, 0, 2 * Math.PI
+                    );
+                    riemannCtx.fill();
+                }
+            }
+            
+            // 计算精确积分值（已知 ∫(sin(x)+1)dx from 0 to 2π = 2π）
+            const exactValue = 2 * Math.PI;
+            const error = Math.abs(totalArea - exactValue);
+            
+            // 添加标签
+            riemannCtx.fillStyle = '#333';
+            riemannCtx.font = '14px Arial';
+            riemannCtx.fillText(`f(x) = sin(x) + 1`, toCanvasX(0.5, width, xRange), toCanvasY(2.3, height, yRange));
+            riemannCtx.fillText(`黎曼和 (${riemannType}端点): ${totalArea.toFixed(4)}`, toCanvasX(0.5, width, xRange), toCanvasY(2.0, height, yRange));
+            riemannCtx.fillText(`精确值: ${exactValue.toFixed(4)}`, toCanvasX(0.5, width, xRange), toCanvasY(1.7, height, yRange));
+            riemannCtx.fillText(`误差: ${error.toFixed(4)}`, toCanvasX(0.5, width, xRange), toCanvasY(1.4, height, yRange));
+        }
+        
+        document.getElementById('partitions').addEventListener('input', function() {
+            partitions = parseInt(this.value);
+            document.getElementById('partitionCount').textContent = partitions;
+            drawRiemann();
+        });
+        
+        document.getElementById('leftSum').addEventListener('click', function() {
+            riemannType = 'left';
+            document.querySelectorAll('#riemann-content .controls button').forEach(btn => {
+                btn.style.background = '#667eea';
+            });
+            this.style.background = '#38a169';
+            drawRiemann();
+        });
+        
+        document.getElementById('rightSum').addEventListener('click', function() {
+            riemannType = 'right';
+            document.querySelectorAll('#riemann-content .controls button').forEach(btn => {
+                btn.style.background = '#667eea';
+            });
+            this.style.background = '#38a169';
+            drawRiemann();
+        });
+        
+        document.getElementById('midpointSum').addEventListener('click', function() {
+            riemannType = 'midpoint';
+            document.querySelectorAll('#riemann-content .controls button').forEach(btn => {
+                btn.style.background = '#667eea';
+            });
+            this.style.background = '#38a169';
+            drawRiemann();
+        });
+        
+        document.getElementById('trapezoidSum').addEventListener('click', function() {
+            riemannType = 'trapezoid';
+            document.querySelectorAll('#riemann-content .controls button').forEach(btn => {
+                btn.style.background = '#667eea';
+            });
+            this.style.background = '#38a169';
+            drawRiemann();
+        });
+        
+        // 微积分基本定理可视化
+        const fundamentalTheoremCanvas = document.getElementById('fundamentalTheoremCanvas');
+        const fundamentalTheoremCtx = fundamentalTheoremCtx = fundamentalTheoremCanvas.getContext('2d');
+        let upperLimit = 2.0;
+        
+        function h(x) {
+            return x * x; // f(x) = x²
+        }
+        
+        function H(x) {
+            return x * x * x / 3; // 原函数 F(x) = x³/3
+        }
+        
+        function drawFundamentalTheorem() {
+            const width = fundamentalTheoremCanvas.width;
+            const height = fundamentalTheoremCanvas.height;
+            const xRange = [0, 3];
+            const yRange1 = [0, 9]; // 用于原函数
+            const yRange2 = [0, 9]; // 用于原函数
+            
+            fundamentalTheoremCtx.clearRect(0, 0, width, height);
+            
+            // 绘制第一个坐标系（原函数）
+            fundamentalTheoremCtx.save();
+            fundamentalTheoremCtx.beginPath();
+            fundamentalTheoremCtx.rect(0, 0, width, height/2 - 10);
+            fundamentalTheoremCtx.clip();
+            
+            drawAxes(fundamentalTheoremCtx, width, height/2 - 10, xRange, yRange1);
+            
+            // 绘制原函数 f(x) = x²
+            fundamentalTheoremCtx.strokeStyle = '#667eea';
+            fundamentalTheoremCtx.lineWidth = 3;
+            fundamentalTheoremCtx.beginPath();
+            
+            for (let x = xRange[0]; x <= xRange[1]; x += 0.01) {
+                const y = h(x);
+                if (x === xRange[0]) {
+                    fundamentalTheoremCtx.moveTo(toCanvasX(x, width, xRange), toCanvasY(y, height/2 - 10, yRange1));
+                } else {
+                    fundamentalTheoremCtx.lineTo(toCanvasX(x, width, xRange), toCanvasY(y, height/2 - 10, yRange1));
+                }
+            }
+            fundamentalTheoremCtx.stroke();
+            
+            // 绘制积分区域
+            const a = 0;
+            const dx = 0.01;
+            fundamentalTheoremCtx.fillStyle = 'rgba(236, 201, 75, 0.3)';
+            
+            for (let x = a; x <= upperLimit; x += dx) {
+                const y = h(x);
+                fundamentalTheoremCtx.fillRect(
+                    toCanvasX(x, width, xRange),
+                    toCanvasY(y, height/2 - 10, yRange1),
+                    toCanvasX(dx, width, xRange),
+                    toCanvasY(0, height/2 - 10, yRange1) - toCanvasY(y, height/2 - 10, yRange1)
+                );
+            }
+            
+            // 标记上界
+            fundamentalTheoremCtx.strokeStyle = '#e53e3e';
+            fundamentalTheoremCtx.lineWidth = 2;
+            fundamentalTheoremCtx.setLineDash([5, 5]);
+            fundamentalTheoremCtx.beginPath();
+            fundamentalTheoremCtx.moveTo(toCanvasX(upperLimit, width, xRange), 0);
+            fundamentalTheoremCtx.lineTo(toCanvasX(upperLimit, width, xRange), height/2 - 10);
+            fundamentalTheoremCtx.stroke();
+            fundamentalTheoremCtx.setLineDash([]);
+            
+            fundamentalTheoremCtx.restore();
+            
+            // 绘制第二个坐标系（原函数）
+            fundamentalTheoremCtx.save();
+            fundamentalTheoremCtx.beginPath();
+            fundamentalTheoremCtx.rect(0, height/2, width, height/2 - 10);
+            fundamentalTheoremCtx.clip();
+            
+            drawAxes(fundamentalTheoremCtx, width, height/2 - 10, xRange, yRange2);
+            
+            // 绘制原函数 F(x) = x³/3
+            fundamentalTheoremCtx.strokeStyle = '#e53e3e';
+            fundamentalTheoremCtx.lineWidth = 3;
+            fundamentalTheoremCtx.beginPath();
+            
+            for (let x = xRange[0]; x <= xRange[1]; x += 0.01) {
+                const y = H(x);
+                if (x === xRange[0]) {
+                    fundamentalTheoremCtx.moveTo(toCanvasX(x, width, xRange), toCanvasY(y, height/2 - 10, yRange2));
+                } else {
+                    fundamentalTheoremCtx.lineTo(toCanvasX(x, width, xRange), toCanvasY(y, height/2 - 10, yRange2));
+                }
+            }
+            fundamentalTheoremCtx.stroke();
+            
+            // 标记点
+            fundamentalTheoremCtx.fillStyle = '#e53e3e';
+            fundamentalTheoremCtx.beginPath();
+            fundamentalTheoremCtx.arc(
+                toCanvasX(upperLimit, width, xRange),
+                toCanvasY(H(upperLimit), height/2 - 10, yRange2),
+                6, 0, 2 * Math.PI
+            );
+            fundamentalTheoremCtx.fill();
+            
+            // 绘制切线
+            const slope = h(upperLimit); // 根据微积分基本定理，F'(x) = f(x)
+            fundamentalTheoremCtx.strokeStyle = '#38a169';
+            fundamentalTheoremCtx.lineWidth = 2;
+            fundamentalTheoremCtx.setLineDash([5, 5]);
+            fundamentalTheoremCtx.beginPath();
+            const tangentY1 = slope * (xRange[0] - upperLimit) + H(upperLimit);
+            const tangentY2 = slope * (xRange[1] - upperLimit) + H(upperLimit);
+            fundamentalTheoremCtx.moveTo(toCanvasX(xRange[0], width, xRange), toCanvasY(tangentY1, height/2 - 10, yRange2));
+            fundamentalTheoremCtx.lineTo(toCanvasX(xRange[1], width, xRange), toCanvasY(tangentY2, height/2 - 10, yRange2));
+            fundamentalTheoremCtx.stroke();
+            fundamentalTheoremCtx.setLineDash([]);
+            
+            fundamentalTheoremCtx.restore();
+            
+            // 添加标签
+            fundamentalTheoremCtx.fillStyle = '#333';
+            fundamentalTheoremCtx.font = '14px Arial';
+            fundamentalTheoremCtx.fillText('原函数 f(x) = x²', 20, 20);
+            fundamentalTheoremCtx.fillText('积分函数 F(x) = ∫₀ˣ t²dt = x³/3', 20, height/2 + 20);
+            fundamentalTheoremCtx.fillText(`F'(${upperLimit.toFixed(1)}) = f(${upperLimit.toFixed(1)}) = ${(upperLimit*upperLimit).toFixed(2)}`, 20, height/2 + 45);
+            fundamentalTheoremCtx.fillText(`∫₀^${upperLimit.toFixed(1)} t²dt = F(${upperLimit.toFixed(1)}) = ${H(upperLimit).toFixed(3)}`, 20, height/2 + 65);
+        }
+        
+        document.getElementById('upperLimit').addEventListener('input', function() {
+            upperLimit = parseFloat(this.value);
+            document.getElementById('upperLimitValue').textContent = upperLimit.toFixed(1);
+            drawFundamentalTheorem();
+        });
+        
+        // 概率密度函数可视化
+        const probabilityCanvas = document.getElementById('probabilityCanvas');
+        const probabilityCtx = probabilityCanvas.getContext('2d');
+        let zScore = 1.0;
+        
+        function normalPDF(x) {
+            return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-x * x / 2);
+        }
+        
+        function drawProbability() {
+            const width = probabilityCanvas.width;
+            const height = probabilityCanvas.height;
+            const xRange = [-3, 3];
+            const yRange = [0, 0.45];
+            
+            probabilityCtx.clearRect(0, 0, width, height);
+            drawAxes(probabilityCtx, width, height, xRange, yRange);
+            
+            // 绘制正态分布曲线
+            probabilityCtx.strokeStyle = '#667eea';
+            probabilityCtx.lineWidth = 3;
+            probabilityCtx.beginPath();
+            
+            for (let x = xRange[0]; x <= xRange[1]; x += 0.01) {
+                const y = normalPDF(x);
+                if (x === xRange[0]) {
+                    probabilityCtx.moveTo(toCanvasX(x, width, xRange), toCanvasY(y, height, yRange));
+                } else {
+                    probabilityCtx.lineTo(toCanvasX(x, width, xRange), toCanvasY(y, height, yRange));
+                }
+            }
+            probabilityCtx.stroke();
+            
+            // 填充区域
+            probabilityCtx.fillStyle = 'rgba(102, 126, 234, 0.3)';
+            probabilityCtx.beginPath();
+            probabilityCtx.moveTo(toCanvasX(-zScore, width, xRange), toCanvasY(0, height, yRange));
+            
+            for (let x = -zScore; x <= zScore; x += 0.01) {
+                const y = normalPDF(x);
+                probabilityCtx.lineTo(toCanvasX(x, width, xRange), toCanvasY(y, height, yRange));
+            }
+            
+            probabilityCtx.lineTo(toCanvasX(zScore, width, xRange), toCanvasY(0, height, yRange));
+            probabilityCtx.closePath();
+            probabilityCtx.fill();
+            
+            // 计算概率（使用近似方法）
+            let probability = 0;
+            const dx = 0.001;
+            for (let x = -zScore; x <= zScore; x += dx) {
+                probability += normalPDF(x) * dx;
+            }
+            
+            // 添加标签
+            probabilityCtx.fillStyle = '#333';
+            probabilityCtx.font = '14px Arial';
+            probabilityCtx.fillText(`标准正态分布 N(0,1)`, toCanvasX(-2.5, width, xRange), toCanvasY(0.4, height, yRange));
+            probabilityCtx.fillText(`P(-${zScore.toFixed(1)} ≤ X ≤ ${zScore.toFixed(1)}) ≈ ${probability.toFixed(4)}`, 
+                toCanvasX(-2.5, width, xRange), toCanvasY(0.35, height, yRange));
+            probabilityCtx.fillText(`(精确值 ≈ ${getExactProbability(zScore).toFixed(4)})`, 
+                toCanvasX(-2.5, width, xRange), toCanvasY(0.3, height, yRange));
+        }
+        
+        // 简单的正态分布概率近似函数
+        function getExactProbability(z) {
+            // 使用经验公式近似标准正态分布的累积概率
+            const t = 1 / (1 + 0.2316419 * z);
+            const d = 0.3989423 * Math.exp(-z * z / 2);
+            const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+            return 1 - p;
+        }
+        
+        document.getElementById('zScore').addEventListener('input', function() {
+            zScore = parseFloat(this.value);
+            document.getElementById('zScoreValue').textContent = zScore.toFixed(1);
+            drawProbability();
+        });
+        
+        // 泰勒级数可视化
+        const taylorCanvas = document.getElementById('taylorCanvas');
+        const taylorCtx = taylorCanvas.getContext('2d');
+        let terms = 3;
+        
+        function sinFunc(x) {
+            return Math.sin(x);
+        }
+        
+        function taylorSin(x, n) {
+            let result = 0;
+            for (let i = 0; i < n; i++) {
+                const term = Math.pow(-1, i) * Math.pow(x, 2 * i + 1) / factorial(2 * i + 1);
+                result += term;
+            }
+            return result;
+        }
+        
+        function factorial(n) {
+            if (n <= 1) return 1;
+            return n * factorial(n - 1);
+        }
+        
+        function drawTaylor() {
+            const width = taylorCanvas.width;
+            const height = taylorCanvas.height;
+            const xRange = [-2 * Math.PI, 2 * Math.PI];
+            const yRange = [-2, 2];
+            
+            taylorCtx.clearRect(0, 0, width, height);
+            drawAxes(taylorCtx, width, height, xRange, yRange);
+            
+            // 绘制原始函数 sin(x)
+            taylorCtx.strokeStyle = '#667eea';
+            taylorCtx.lineWidth = 3;
+            taylorCtx.beginPath();
+            
+            for (let x = xRange[0]; x <= xRange[1]; x += 0.01) {
+                const y = sinFunc(x);
+                if (x === xRange[0]) {
+                    taylorCtx.moveTo(toCanvasX(x, width, xRange), toCanvasY(y, height, yRange));
+                } else {
+                    taylorCtx.lineTo(toCanvasX(x, width, xRange), toCanvasY(y, height, yRange));
+                }
+            }
+            taylorCtx.stroke();
+            
+            // 绘制泰勒多项式
+            taylorCtx.strokeStyle = '#e53e3e';
+            taylorCtx.lineWidth = 2;
+            taylorCtx.setLineDash([5, 5]);
+            taylorCtx.beginPath();
+            
+            for (let x = xRange[0]; x <= xRange[1]; x += 0.01) {
+                const y = taylorSin(x, terms);
+                if (x === xRange[0]) {
+                    taylorCtx.moveTo(toCanvasX(x, width, xRange), toCanvasY(y, height, yRange));
+                } else {
+                    taylorCtx.lineTo(toCanvasX(x, width, xRange), toCanvasY(y, height, yRange));
+                }
+            }
+            taylorCtx.stroke();
+            taylorCtx.setLineDash([]);
+            
+            // 添加标签
+            taylorCtx.fillStyle = '#333';
+            taylorCtx.font = '14px Arial';
+            taylorCtx.fillText('f(x) = sin(x)', toCanvasX(3, width, xRange), toCanvasY(1.7, height, yRange));
+            
+            // 生成泰勒级数公式
+            let formula = 'P_' + terms + '(x) = ';
+            for (let i = 0; i < terms; i++) {
+                const sign = i % 2 === 0 ? '+' : '-';
+                const exponent = 2 * i + 1;
+                if (i === 0) {
+                    formula += 'x';
+                } else {
+                    formula += ' ' + sign + ' x^' + exponent + '/' + factorial(exponent);
+                }
+            }
+            
+            taylorCtx.fillText(formula, toCanvasX(3, width, xRange), toCanvasY(1.3, height, yRange));
+            
+            // 在x=π/2处计算误差
+            const xTest = Math.PI / 2;
+            const exact = sinFunc(xTest);
+            const approx = taylorSin(xTest, terms);
+            const error = Math.abs(exact - approx);
+            
+            taylorCtx.fillText(`在 x=π/2 处:`, toCanvasX(3, width, xRange), toCanvasY(0.8, height, yRange));
+            taylorCtx.fillText(`精确值: ${exact.toFixed(4)}`, toCanvasX(3, width, xRange), toCanvasY(0.5, height, yRange));
+            taylorCtx.fillText(`近似值: ${approx.toFixed(4)}`, toCanvasX(3, width, xRange), toCanvasY(0.2, height, yRange));
+            taylorCtx.fillText(`误差: ${error.toFixed(4)}`, toCanvasX(3, width, xRange), toCanvasY(-0.1, height, yRange));
+        }
+        
+        document.getElementById('terms').addEventListener('input', function() {
+            terms = parseInt(this.value);
+            document.getElementById('termsValue').textContent = terms;
+            drawTaylor();
+        });
+        
+        // 多元函数可视化
+        const multivariableCanvas = document.getElementById('multivariableCanvas');
+        const multivariableCtx = multivariableCanvas.getContext('2d');
+        let currentView = 'surface';
+        
+        function f2(x, y) {
+            return Math.sin(Math.sqrt(x * x + y * y)) / Math.sqrt(x * x + y * y + 0.1);
+        }
+        
+        function drawMultivariable() {
+            const width = multivariableCanvas.width;
+            const height = multivariableCanvas.height;
+            const xRange = [-5, 5];
+            const yRange = [-5, 5];
+            
+            multivariableCtx.clearRect(0, 0, width, height);
+            
+            if (currentView === 'surface') {
+                drawSurfacePlot();
+            } else if (currentView === 'contour') {
+                drawContourPlot();
+            } else if (currentView === 'gradient') {
+                drawGradientField();
+            }
+        }
+        
+        function drawSurfacePlot() {
+            const width = multivariableCanvas.width;
+            const height = multivariableCanvas.height;
+            const xRange = [-5, 5];
+            const yRange = [-5, 5];
+            const zRange = [-0.5, 1];
+            
+            // 创建渐变
+            const gradient = multivariableCtx.createLinearGradient(0, 0, width, 0);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            
+            // 绘制曲面（简化为线框图）
+            const step = 0.5;
+            multivariableCtx.lineWidth = 0.5;
+            
+            // 绘制x方向的线
+            multivariableCtx.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+            for (let x = xRange[0]; x <= xRange[1]; x += step) {
+                multivariableCtx.beginPath();
+                for (let y = yRange[0]; y <= yRange[1]; y += 0.1) {
+                    const z = f2(x, y);
+                    const canvasX = (x - xRange[0]) / (xRange[1] - xRange[0]) * width;
+                    const canvasY = height - (z - zRange[0]) / (zRange[1] - zRange[0]) * height * 0.8 + 20;
+                    if (y === yRange[0]) {
+                        multivariableCtx.moveTo(canvasX, canvasY);
+                    } else {
+                        multivariableCtx.lineTo(canvasX, canvasY);
+                    }
+                }
+                multivariableCtx.stroke();
+            }
+            
+            // 绘制y方向的线
+            for (let y = yRange[0]; y <= yRange[1]; y += step) {
+                multivariableCtx.beginPath();
+                for (let x = xRange[0]; x <= xRange[1]; x += 0.1) {
+                    const z = f2(x, y);
+                    const canvasX = (x - xRange[0]) / (xRange[1] - xRange[0]) * width;
+                    const canvasY = height - (z - zRange[0]) / (zRange[1] - zRange[0]) * height * 0.8 + 20;
+                    if (x === xRange[0]) {
+                        multivariableCtx.moveTo(canvasX, canvasY);
+                    } else {
+                        multivariableCtx.lineTo(canvasX, canvasY);
+                    }
+                }
+                multivariableCtx.stroke();
+            }
+            
+            // 添加标签
+            multivariableCtx.fillStyle = '#333';
+            multivariableCtx.font = '14px Arial';
+            multivariableCtx.fillText('f(x,y) = sin(√(x²+y²)) / √(x²+y²+0.1)', 20, 30);
+            multivariableCtx.fillText('三维曲面图', 20, 50);
+        }
+        
+        function drawContourPlot() {
+            const width = multivariableCanvas.width;
+            const height = multivariableCanvas.height;
+            const xRange = [-5, 5];
+            const yRange = [-5, 5];
+            
+            // 绘制等高线
+            const levels = 10;
+            const step = (yRange[1] - yRange[0]) / levels;
+            
+            for (let i = 0; i <= levels; i++) {
+                const z = -0.4 + i * 0.8 / levels;
+                multivariableCtx.strokeStyle = `hsl(${240 - i * 24}, 70%, 50%)`;
+                multivariableCtx.lineWidth = 1.5;
+                
+                multivariableCtx.beginPath();
+                for (let t = 0; t <= 2 * Math.PI; t += 0.01) {
+                    // 这里简化处理，实际应该解方程 f(x,y) = z
+                    const r = Math.sqrt(4 - z * z); // 近似
+                    const x = r * Math.cos(t);
+                    const y = r * Math.sin(t);
+                    
+                    if (t === 0) {
+                        multivariableCtx.moveTo(
+                            toCanvasX(x, width, xRange),
+                            toCanvasY(y, height, yRange)
+                        );
+                    } else {
+                        multivariableCtx.lineTo(
+                            toCanvasX(x, width, xRange),
+                            toCanvasY(y, height, yRange)
+                        );
+                    }
+                }
+                multivariableCtx.closePath();
+                multivariableCtx.stroke();
+                
+                // 添加标签
+                const labelX = 3 * Math.cos(i * Math.PI / levels);
+                const labelY = 3 * Math.sin(i * Math.PI / levels);
+                multivariableCtx.fillStyle = multivariableCtx.strokeStyle;
+                multivariableCtx.font = '12px Arial';
+                multivariableCtx.fillText(z.toFixed(1), 
+                    toCanvasX(labelX, width, xRange),
+                    toCanvasY(labelY, height, yRange));
+            }
+            
+            // 绘制坐标轴
+            drawAxes(multivariableCtx, width, height, xRange, yRange);
+            
+            // 添加标签
+            multivariableCtx.fillStyle = '#333';
+            multivariableCtx.font = '14px Arial';
+            multivariableCtx.fillText('f(x,y) = sin(√(x²+y²)) / √(x²+y²+0.1)', 20, 30);
+            multivariableCtx.fillText('等高线图', 20, 50);
+        }
+        
+        function drawGradientField() {
+            const width = multivariableCanvas.width;
+            const height = multivariableCanvas.height;
+            const xRange = [-5, 5];
+            const yRange = [-5, 5];
+            
+            // 绘制坐标轴
+            drawAxes(multivariableCtx, width, height, xRange, yRange);
+            
+            // 绘制梯度场
+            const step = 1;
+            multivariableCtx.strokeStyle = '#667eea';
+            multivariableCtx.lineWidth = 1;
+            
+            for (let x = xRange[0]; x <= xRange[1]; x += step) {
+                for (let y = yRange[0]; y <= yRange[1]; y += step) {
+                    // 计算偏导数（使用中心差分近似）
+                    const h = 0.01;
+                    const dfdx = (f2(x + h, y) - f2(x - h, y)) / (2 * h);
+                    const dfdy = (f2(x, y + h) - f2(x, y - h)) / (2 * h);
+                    
+                    // 归一化并缩放
+                    const magnitude = Math.sqrt(dfdx * dfdx + dfdy * dfdy);
+                    const scale = 0.3;
+                    const dx = dfdx / magnitude * scale;
+                    const dy = dfdy / magnitude * scale;
+                    
+                    // 绘制箭头
+                    multivariableCtx.beginPath();
+                    multivariableCtx.moveTo(
+                        toCanvasX(x, width, xRange),
+                        toCanvasY(y, height, yRange)
+                    );
+                    multivariableCtx.lineTo(
+                        toCanvasX(x + dx, width, xRange),
+                        toCanvasY(y + dy, height, yRange)
+                    );
+                    multivariableCtx.stroke();
+                    
+                    // 绘制箭头头
+                    const angle = Math.atan2(dy, dx);
+                    const arrowSize = 4;
+                    multivariableCtx.beginPath();
+                    multivariableCtx.moveTo(
+                        toCanvasX(x + dx, width, xRange),
+                        toCanvasY(y + dy, height, yRange)
+                    );
+                    multivariableCtx.lineTo(
+                        toCanvasX(x + dx - arrowSize * Math.cos(angle - Math.PI/6), width, xRange),
+                        toCanvasY(y + dy - arrowSize * Math.sin(angle - Math.PI/6), height, yRange)
+                    );
+                    multivariableCtx.lineTo(
+                        toCanvasX(x + dx - arrowSize * Math.cos(angle + Math.PI/6), width, xRange),
+                        toCanvasY(y + dy - arrowSize * Math.sin(angle + Math.PI/6), height, yRange)
+                    );
+                    multivariableCtx.closePath();
+                    multivariableCtx.fillStyle = '#667eea';
+                    multivariableCtx.fill();
+                }
+            }
+            
+            // 添加标签
+            multivariableCtx.fillStyle = '#333';
+            multivariableCtx.font = '14px Arial';
+            multivariableCtx.fillText('f(x,y) = sin(√(x²+y²)) / √(x²+y²+0.1)', 20, 30);
+            multivariableCtx.fillText('梯度场', 20, 50);
+            multivariableCtx.fillText('∇f = (∂f/∂x, ∂f/∂y)', 20, 70);
+        }
+        
+        document.getElementById('showSurface').addEventListener('click', function() {
+            currentView = 'surface';
+            document.querySelectorAll('#multivariableCanvas ~ .controls button').forEach(btn => {
+                btn.style.background = '#667eea';
+            });
+            this.style.background = '#38a169';
+            drawMultivariable();
+        });
+        
+        document.getElementById('showContour').addEventListener('click', function() {
+            currentView = 'contour';
+            document.querySelectorAll('#multivariableCanvas ~ .controls button').forEach(btn => {
+                btn.style.background = '#667eea';
+            });
+            this.style.background = '#38a169';
+            drawMultivariable();
+        });
+        
+        document.getElementById('showGradient').addEventListener('click', function() {
+            currentView = 'gradient';
+            document.querySelectorAll('#multivariableCanvas ~ .controls button').forEach(btn => {
+                btn.style.background = '#667eea';
+            });
+            this.style.background = '#38a169';
+            drawMultivariable();
+        });
+        
+        // 选项卡功能
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 移除所有active类
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // 添加active类到当前选项卡和内容
+                this.classList.add('active');
+                document.getElementById(this.getAttribute('data-tab') + '-content').classList.add('active');
+            });
+        });
+        
+        // 练习题功能
+        document.querySelectorAll('.toggle-hint').forEach(button => {
+            button.addEventListener('click', function() {
+                const hint = this.nextElementSibling;
+                hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
+                this.textContent = hint.style.display === 'block' ? '隐藏提示' : '显示提示';
+            });
+        });
+        
+        document.querySelectorAll('.toggle-solution').forEach(button => {
+            button.addEventListener('click', function() {
+                const solution = this.nextElementSibling;
+                solution.style.display = solution.style.display === 'block' ? 'none' : 'block';
+                this.textContent = solution.style.display === 'block' ? '隐藏解答' : '显示解答';
+            });
+        });
+        
+        // 进度条模拟
+        let progress = 25;
+        const progressBar = document.getElementById('progressBar');
+        const breadcrumbItems = document.querySelectorAll('.breadcrumb a');
+        
+        breadcrumbItems.forEach((item, index) => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (!this.classList.contains('active')) {
+                    progress = (index + 1) * 25;
+                    progressBar.style.width = progress + '%';
+                    
+                    document.querySelector('.breadcrumb a.active').classList.remove('active');
+                    this.classList.add('active');
+                }
+            });
+        });
+        
+        // 初始化所有画布
+        window.addEventListener('resize', function() {
+            resizeCanvas(epsilonDeltaCanvas);
+            resizeCanvas(meanValueCanvas);
+            resizeCanvas(riemannCanvas);
+            resizeCanvas(fundamentalTheoremCanvas);
+            resizeCanvas(probabilityCanvas);
+            resizeCanvas(taylorCanvas);
+            resizeCanvas(multivariableCanvas);
+            
+            drawEpsilonDelta();
+            drawMeanValue();
+            drawRiemann();
+            drawFundamentalTheorem();
+            drawProbability();
+            drawTaylor();
+            drawMultivariable();
+        });
+        
+        // 初始绘制
+        resizeCanvas(epsilonDeltaCanvas);
+        resizeCanvas(meanValueCanvas);
+        resizeCanvas(riemannCanvas);
+        resizeCanvas(fundamentalTheoremCanvas);
+        resizeCanvas(probabilityCanvas);
+        resizeCanvas(taylorCanvas);
+        resizeCanvas(multivariableCanvas);
+        
+        drawEpsilonDelta();
+        drawMeanValue();
+        drawRiemann();
+        drawFundamentalTheorem();
+        drawProbability();
+        drawTaylor();
+        drawMultivariable();
+    </script>
+</body>
+</html>

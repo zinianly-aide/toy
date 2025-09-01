@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试页面</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="canvas-container h-80 mx-auto my-10 max-w-2xl">
+        <canvas id="introCanvas"></canvas>
+    </div>
+
+    <script>
+        // 简介部分的Canvas
+        function initIntroCanvas() {
+            const canvas = document.getElementById('introCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // 设置Canvas尺寸
+            canvas.width = 800;
+            canvas.height = 400;
+            
+            // 绘制简单的测试图形
+            ctx.beginPath();
+            ctx.fillStyle = '#2563eb';
+            ctx.fillRect(100, 100, 200, 200);
+            
+            // 显示文本
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Canvas测试成功!', canvas.width / 2, canvas.height / 2);
+        }
+        
+        // 页面加载完成后执行
+        window.addEventListener('load', () => {
+            initIntroCanvas();
+        });
+    </script>
+</body>
+</html>
