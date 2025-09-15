@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电视可视化 - 微积分教程网站</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=STIX+Two+Math&display=swap" rel="stylesheet">
+    <!-- 自定义 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#f97316',
+                        accent: '#7c3aed',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                        math: ['STIX Two Math', 'serif']
+                    },
+                },
+            }
+        }
+    </script>
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .transition-custom {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+        }
+    </style>
+    <!-- 页面样式 -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="font-inter bg-gray-50 text-dark">
+    <!-- 导航栏 -->
+    <nav id="navbar" class="fixed w-full z-50 transition-all duration-300 bg-transparent">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <!-- 网站Logo -->
+                <a href="/index.html" class="flex items-center space-x-2">
+                    <span class="text-primary text-2xl"><i class="fa fa-area-chart"></i></span>
+                    <span class="text-xl font-bold">微积分探索</span>
+                </a>
+                
+                <!-- 桌面端菜单 -->
+                <div class="hidden md:flex space-x-8">
+                    <a href="/index.html" class="font-medium hover:text-primary transition-custom">首页</a>
+                    <a href="/content/tutorials/calculus-tutorial.html" class="font-medium hover:text-primary transition-custom">微积分教程</a>
+                    <a href="/content/applications/computer-graphics.html" class="font-medium hover:text-primary transition-custom">应用案例</a>
+                    <a href="/content/television-visualization.html" class="font-medium text-primary border-b-2 border-primary pb-1">电视可视化</a>
+                </div>
+                
+                <!-- 移动端菜单按钮 -->
+                <button id="menu-toggle" class="md:hidden text-dark focus:outline-none">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white shadow-lg absolute w-full">
+            <div class="container mx-auto px-4 py-4 space-y-4">
+                <a href="/index.html" class="block py-2 hover:text-primary transition-custom">首页</a>
+                <a href="/content/tutorials/calculus-tutorial.html" class="block py-2 hover:text-primary transition-custom">微积分教程</a>
+                <a href="/content/applications/computer-graphics.html" class="block py-2 hover:text-primary transition-custom">应用案例</a>
+                <a href="/content/television-visualization.html" class="block py-2 text-primary font-medium">电视可视化</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 页面内容 -->
+    <main class="pt-24 pb-16">
+        <!-- 标题部分 -->
+        <section class="container mx-auto px-4 mb-16">
+            <div class="text-center">
+                <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold text-dark mb-4">交互式电视可视化</h1>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">探索Canvas技术如何模拟电视界面和动态内容显示，结合微积分原理创建有趣的可视化效果</p>
+            </div>
+        </section>
+        
+        <!-- 电视可视化区域 -->
+        <section class="container mx-auto px-4 mb-16">
+            <div class="bg-white rounded-xl shadow-lg p-6 section-fade">
+                <div class="h-[500px] w-full">
+                    <canvas id="televisionCanvas" class="w-full h-full rounded-lg border border-gray-200"></canvas>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 功能说明部分 -->
+        <section class="container mx-auto px-4 mb-16">
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white rounded-xl shadow-lg p-6 transition-transform hover:scale-105 duration-300 section-fade">
+                    <div class="text-primary text-4xl mb-4"><i class="fa fa-desktop"></i></div>
+                    <h3 class="text-xl font-bold mb-2">交互式体验</h3>
+                    <p class="text-gray-600">点击屏幕切换不同频道，滚轮调整音量，双击开关电视，体验完整的交互控制。</p>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-lg p-6 transition-transform hover:scale-105 duration-300 section-fade">
+                    <div class="text-secondary text-4xl mb-4"><i class="fa fa-area-chart"></i></div>
+                    <h3 class="text-xl font-bold mb-2">微积分可视化</h3>
+                    <p class="text-gray-600">频道1展示动态的微积分函数图形，包括正弦曲线及其导数，直观理解函数变化规律。</p>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-lg p-6 transition-transform hover:scale-105 duration-300 section-fade">
+                    <div class="text-accent text-4xl mb-4"><i class="fa fa-magic"></i></div>
+                    <h3 class="text-xl font-bold mb-2">动画效果</h3>
+                    <p class="text-gray-600">利用Canvas动画技术创建流畅的波浪效果和彩色条纹，展示计算机图形的基础原理。</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 技术说明部分 -->
+        <section class="container mx-auto px-4 mb-16 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl shadow-lg p-8 section-fade">
+            <h2 class="text-2xl font-bold mb-6 text-center">技术实现说明</h2>
+            
+            <div class="space-y-6 max-w-4xl mx-auto">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold mb-2">Canvas 绘图技术</h3>
+                    <p class="text-gray-700">本可视化使用HTML5 Canvas API绘制电视外观和屏幕内容。Canvas提供了强大的2D绘图功能，支持绘制图形、文本和动画效果。</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold mb-2">动画与交互</h3>
+                    <p class="text-gray-700">通过requestAnimationFrame实现流畅的动画效果，结合鼠标和触摸事件实现交互控制。支持点击切换频道、滚轮调整音量和双击开关电视。</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold mb-2">响应式设计</h3>
+                    <p class="text-gray-700">电视界面会根据容器大小自动调整，确保在不同屏幕尺寸上都能保持良好的显示效果。使用Tailwind CSS实现响应式布局。</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">微积分探索</h3>
+                    <p class="text-gray-400">通过交互式可视化学习微积分的基础知识和应用案例。</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">快速链接</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/index.html" class="text-gray-400 hover:text-white transition-custom">首页</a></li>
+                        <li><a href="/content/tutorials/calculus-tutorial.html" class="text-gray-400 hover:text-white transition-custom">微积分教程</a></li>
+                        <li><a href="/content/applications/computer-graphics.html" class="text-gray-400 hover:text-white transition-custom">应用案例</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">应用案例</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/content/applications/computer-graphics.html" class="text-gray-400 hover:text-white transition-custom">计算机图形学</a></li>
+                        <li><a href="/content/applications/physics-applications.html" class="text-gray-400 hover:text-white transition-custom">物理学应用</a></li>
+                        <li><a href="/content/applications/economics-applications.html" class="text-gray-400 hover:text-white transition-custom">经济学应用</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">联系我们</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white text-xl transition-custom"><i class="fa fa-github"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white text-xl transition-custom"><i class="fa fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white text-xl transition-custom"><i class="fa fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500">
+                <p>&copy; 2023 微积分探索. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="/static/js/canvas-functions.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

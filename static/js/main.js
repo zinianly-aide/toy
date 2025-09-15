@@ -85,33 +85,23 @@ function initPage() {
     
     // 初始化所有Canvas
     window.addEventListener('load', () => {
-        // 初始化所有Canvas函数
-        if (typeof initIntroCanvas === 'function') {
-            initIntroCanvas();
-        }
+        // 检查canvas元素是否存在，然后初始化对应的函数
+        const canvasElements = {
+            'introCanvas': initIntroCanvas,
+            'derivativeCanvas': initDerivativeCanvas,
+            'integralCanvas': initIntegralCanvas,
+            'fundamentalTheoremCanvas': initFundamentalTheoremCanvas,
+            'physicsCanvas': initPhysicsCanvas,
+            'economicsCanvas': initEconomicsCanvas,
+            'engineeringCanvas': initEngineeringCanvas,
+            'televisionCanvas': initTelevisionCanvas
+        };
         
-        if (typeof initDerivativeCanvas === 'function') {
-            initDerivativeCanvas();
-        }
-        
-        if (typeof initIntegralCanvas === 'function') {
-            initIntegralCanvas();
-        }
-        
-        if (typeof initFundamentalTheoremCanvas === 'function') {
-            initFundamentalTheoremCanvas();
-        }
-        
-        if (typeof initPhysicsCanvas === 'function') {
-            initPhysicsCanvas();
-        }
-        
-        if (typeof initEconomicsCanvas === 'function') {
-            initEconomicsCanvas();
-        }
-        
-        if (typeof initEngineeringCanvas === 'function') {
-            initEngineeringCanvas();
+        for (const [canvasId, initFunction] of Object.entries(canvasElements)) {
+            const canvas = document.getElementById(canvasId);
+            if (canvas && typeof initFunction === 'function') {
+                initFunction();
+            }
         }
     });
 }

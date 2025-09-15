@@ -1204,3 +1204,289 @@ function initEngineeringCanvas() {
         ctx.fillText('F', weightX + 15, h * 0.3);
     }
 }
+
+// 电视可视化Canvas
+function initTelevisionCanvas() {
+    const canvas = document.getElementById('televisionCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // 电视状态
+    let channel = 1;
+    let volume = 50;
+    let isOn = true;
+    let animationFrame;
+    
+    // 设置Canvas尺寸
+    function resizeCanvas() {
+        const container = canvas.parentElement;
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        if (isOn) {
+            drawTelevision();
+        }
+    }
+    
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    
+    // 电视屏幕上的动态内容
+    function drawTVContent(timestamp) {
+        if (!isOn) return;
+        
+        const w = canvas.width;
+        const h = canvas.height;
+        const screenX = w * 0.2;
+        const screenY = h * 0.2;
+        const screenWidth = w * 0.6;
+        const screenHeight = h * 0.5;
+        
+        // 清空屏幕区域
+        ctx.fillStyle = '#000';
+        ctx.fillRect(screenX, screenY, screenWidth, screenHeight);
+        
+        // 根据不同频道显示不同内容
+        if (channel === 1) {
+            // 频道1：显示微积分图形
+            drawCalculusContent(screenX, screenY, screenWidth, screenHeight, timestamp);
+        } else if (channel === 2) {
+            // 频道2：显示波浪动画
+            drawWaveContent(screenX, screenY, screenWidth, screenHeight, timestamp);
+        } else if (channel === 3) {
+            // 频道3：显示彩色条纹
+            drawStripeContent(screenX, screenY, screenWidth, screenHeight, timestamp);
+        }
+        
+        // 显示频道和音量信息
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.font = '12px Inter, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(`频道: ${channel}`, screenX + 10, screenY + 20);
+        ctx.fillText(`音量: ${volume}`, screenX + 10, screenY + 40);
+        
+        // 继续动画
+        animationFrame = requestAnimationFrame(drawTVContent);
+    }
+    
+    // 微积分图形内容
+    function drawCalculusContent(x, y, width, height, timestamp) {
+        const time = timestamp / 2000;
+        
+        // 绘制坐标轴
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, y + height/2);
+        ctx.lineTo(x + width, y + height/2);
+        ctx.moveTo(x + width/2, y);
+        ctx.lineTo(x + width/2, y + height);
+        ctx.stroke();
+        
+        // 绘制正弦曲线
+        ctx.beginPath();
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 2;
+        
+        for (let i = 0; i <= width; i += 2) {
+            const t = (i / width) * 2 * Math.PI;
+            const sineY = Math.sin(t + time) * (height * 0.3) + height/2;
+            
+            if (i === 0) {
+                ctx.moveTo(x + i, y + sineY);
+            } else {
+                ctx.lineTo(x + i, y + sineY);
+            }
+        }
+        ctx.stroke();
+        
+        // 绘制导数曲线
+        ctx.beginPath();
+        ctx.strokeStyle = '#f97316';
+        ctx.lineWidth = 2;
+        
+        for (let i = 0; i <= width; i += 2) {
+            const t = (i / width) * 2 * Math.PI;
+            const derivativeY = Math.cos(t + time) * (height * 0.3) + height/2;
+            
+            if (i === 0) {
+                ctx.moveTo(x + i, y + derivativeY);
+            } else {
+                ctx.lineTo(x + i, y + derivativeY);
+            }
+        }
+        ctx.stroke();
+        
+        // 添加说明文字
+        ctx.fillStyle = 'white';
+        ctx.font = '10px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('f(x) = sin(x)', x + width * 0.75, y + height * 0.2);
+        ctx.fillText("f'(x) = cos(x)", x + width * 0.75, y + height * 0.8);
+    }
+    
+    // 波浪动画内容
+    function drawWaveContent(x, y, width, height, timestamp) {
+        const time = timestamp / 1000;
+        
+        for (let w = 0; w < 3; w++) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(${100 + w * 50}, ${150 + w * 30}, ${255}, 0.7)`;
+            ctx.lineWidth = 2;
+            
+            for (let i = 0; i <= width; i += 2) {
+                const t = (i / width) * 2 * Math.PI + time * (w + 1) * 0.5;
+                const waveY = Math.sin(t) * (height * 0.1) * (3 - w) + height/2;
+                
+                if (i === 0) {
+                    ctx.moveTo(x + i, y + waveY);
+                } else {
+                    ctx.lineTo(x + i, y + waveY);
+                }
+            }
+            ctx.stroke();
+        }
+        
+        // 添加随机噪点
+        ctx.fillStyle = 'white';
+        for (let i = 0; i < width * height * 0.0005; i++) {
+            const nx = x + Math.random() * width;
+            const ny = y + Math.random() * height;
+            ctx.fillRect(nx, ny, 1, 1);
+        }
+    }
+    
+    // 彩色条纹内容
+    function drawStripeContent(x, y, width, height, timestamp) {
+        const time = timestamp / 500;
+        const stripeCount = 10;
+        
+        for (let i = 0; i < stripeCount; i++) {
+            const stripeWidth = width / stripeCount;
+            const hue = (i * 36 + time * 20) % 360;
+            
+            ctx.fillStyle = `hsl(${hue}, 80%, 50%)`;
+            ctx.fillRect(x + i * stripeWidth, y, stripeWidth, height);
+        }
+        
+        // 添加扫描线
+        const scanLineY = (Math.sin(time) * 0.5 + 0.5) * height;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.fillRect(x, y + scanLineY, width, 2);
+    }
+    
+    // 绘制电视外观
+    function drawTelevision() {
+        const w = canvas.width;
+        const h = canvas.height;
+        
+        // 清空画布
+        ctx.clearRect(0, 0, w, h);
+        
+        // 绘制电视主体
+        ctx.fillStyle = '#2d3748';
+        ctx.fillRect(w * 0.15, h * 0.15, w * 0.7, h * 0.7);
+        
+        // 绘制电视边框
+        ctx.fillStyle = '#1a202c';
+        ctx.fillRect(w * 0.2, h * 0.2, w * 0.6, h * 0.5);
+        
+        // 绘制底座
+        ctx.fillStyle = '#4a5568';
+        ctx.fillRect(w * 0.35, h * 0.85, w * 0.3, h * 0.05);
+        
+        // 绘制按钮
+        ctx.fillStyle = '#718096';
+        ctx.beginPath();
+        ctx.arc(w * 0.3, h * 0.8, w * 0.02, 0, Math.PI * 2);
+        ctx.arc(w * 0.4, h * 0.8, w * 0.02, 0, Math.PI * 2);
+        ctx.arc(w * 0.6, h * 0.8, w * 0.02, 0, Math.PI * 2);
+        ctx.arc(w * 0.7, h * 0.8, w * 0.02, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 如果电视打开，绘制屏幕内容
+        if (isOn) {
+            drawTVContent(Date.now());
+        } else {
+            // 电视关闭时显示黑屏
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(w * 0.2, h * 0.2, w * 0.6, h * 0.5);
+            
+            // 绘制电源指示灯（红色）
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(w * 0.5, h * 0.18, w * 0.01, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // 绘制文字说明
+        ctx.fillStyle = '#1e293b';
+        ctx.font = '14px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('交互式电视可视化', w * 0.5, h * 0.95);
+        
+        // 绘制操作提示
+        if (isOn) {
+            ctx.fillStyle = '#4a5568';
+            ctx.font = '10px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('点击屏幕切换频道 | 滚轮调整音量 | 双击开关电视', w * 0.5, h * 0.05);
+        }
+    }
+    
+    // 切换电视开关
+    function togglePower() {
+        isOn = !isOn;
+        
+        if (isOn) {
+            drawTelevision();
+        } else {
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+            drawTelevision();
+        }
+    }
+    
+    // 切换频道
+    function changeChannel() {
+        if (!isOn) return;
+        channel = (channel % 3) + 1;
+    }
+    
+    // 调整音量
+    function adjustVolume(delta) {
+        if (!isOn) return;
+        volume = Math.max(0, Math.min(100, volume + delta));
+    }
+    
+    // 添加鼠标事件
+    canvas.addEventListener('click', () => {
+        if (isOn) {
+            changeChannel();
+        }
+    });
+    
+    canvas.addEventListener('dblclick', () => {
+        togglePower();
+    });
+    
+    // 滚轮事件
+    canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        if (e.deltaY > 0) {
+            adjustVolume(-5);
+        } else {
+            adjustVolume(5);
+        }
+    });
+    
+    // 触摸事件（移动端）
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (isOn) {
+            changeChannel();
+        }
+    }, { passive: false });
+    
+    // 初始化绘制
+    drawTelevision();
+}
